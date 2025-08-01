@@ -21,7 +21,9 @@ export const fetchComponents = createAsyncThunk<
   { rejectValue: string }
 >("components/fetchComponents", async (_, { rejectWithValue }) => {
   try {
-    const response = await axios.get("/api/components");
+    const response = await axios.get(
+      "https://trailer-strore-server.onrender.com/api/components"
+    );
     return response.data;
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.message || error.message);
@@ -41,12 +43,16 @@ export const addComponent = createAsyncThunk<
       );
     }
 
-    const response = await axios.post("/api/components", newComponentData, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await axios.post(
+      "https://trailer-strore-server.onrender.com/api/components",
+      newComponentData,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response.data;
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.message || error.message);
@@ -69,7 +75,7 @@ export const updateComponent = createAsyncThunk<
       }
 
       const response = await axios.put(
-        `/api/components/${updatedComponentData.id}`,
+        `https://trailer-strore-server.onrender.com/api/components/${updatedComponentData.id}`,
         updatedComponentData,
         {
           headers: {
@@ -98,11 +104,14 @@ export const deleteComponent = createAsyncThunk<
       );
     }
 
-    await axios.delete(`/api/components/${componentId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    await axios.delete(
+      `https://trailer-strore-server.onrender.com/api/components/${componentId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return componentId;
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.message || error.message);
@@ -115,7 +124,9 @@ export const fetchComponentById = createAsyncThunk<
   { rejectValue: string }
 >("components/fetchComponentById", async (componentId, { rejectWithValue }) => {
   try {
-    const response = await axios.get(`/api/components/${componentId}`);
+    const response = await axios.get(
+      `https://trailer-strore-server.onrender.com/api/components/${componentId}`
+    );
     return response.data;
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.message || error.message);

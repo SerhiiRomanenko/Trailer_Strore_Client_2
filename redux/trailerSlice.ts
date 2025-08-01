@@ -23,7 +23,9 @@ export const fetchTrailers = createAsyncThunk<
   { rejectValue: string }
 >("trailers/fetchTrailers", async (_, { rejectWithValue }) => {
   try {
-    const response = await axios.get("/api/trailers");
+    const response = await axios.get(
+      "https://trailer-strore-server.onrender.com/api/trailers"
+    );
     return response.data;
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.message || error.message);
@@ -36,7 +38,9 @@ export const fetchTrailerById = createAsyncThunk<
   { rejectValue: string }
 >("trailers/fetchTrailerById", async (id, { rejectWithValue }) => {
   try {
-    const response = await axios.get(`/api/trailers/${id}`);
+    const response = await axios.get(
+      `https://trailer-strore-server.onrender.com/api/trailers/${id}`
+    );
     return response.data;
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.message || error.message);
@@ -49,7 +53,9 @@ export const fetchTrailerBySlug = createAsyncThunk<
   { rejectValue: string }
 >("trailers/fetchTrailerBySlug", async (slug, { rejectWithValue }) => {
   try {
-    const response = await axios.get(`/api/trailers/slug/${slug}`);
+    const response = await axios.get(
+      `https://trailer-strore-server.onrender.com/api/trailers/slug/${slug}`
+    );
     return response.data;
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.message || error.message);
@@ -69,12 +75,16 @@ export const addTrailer = createAsyncThunk<
       );
     }
 
-    const response = await axios.post("/api/trailers", newTrailer, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await axios.post(
+      "https://trailer-strore-server.onrender.com/api/trailers",
+      newTrailer,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response.data;
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.message || error.message);
@@ -122,11 +132,14 @@ export const deleteTrailer = createAsyncThunk<
       );
     }
 
-    await axios.delete(`/api/trailers/${trailerId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    await axios.delete(
+      `https://trailer-strore-server.onrender.com/api/trailers/${trailerId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return trailerId;
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.message || error.message);

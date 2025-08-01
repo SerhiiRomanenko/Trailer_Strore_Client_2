@@ -55,11 +55,14 @@ export const fetchAllOrders = createAsyncThunk<
 >("orders/fetchAllOrders", async (_, { rejectWithValue }) => {
   try {
     const token = localStorage.getItem("authToken");
-    const response = await axios.get("/api/orders", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await axios.get(
+      "https://trailer-strore-server.onrender.com/api/orders",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response.data;
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.message || error.message);
@@ -73,11 +76,14 @@ export const fetchMyOrders = createAsyncThunk<
 >("orders/fetchMyOrders", async (_, { rejectWithValue }) => {
   try {
     const token = localStorage.getItem("authToken");
-    const response = await axios.get("/api/orders/my-orders", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await axios.get(
+      "https://trailer-strore-server.onrender.com/api/orders/my-orders",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response.data;
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.message || error.message);
@@ -92,11 +98,14 @@ export const fetchOrderById = createAsyncThunk<
 >("orders/fetchOrderById", async (orderId, { rejectWithValue }) => {
   try {
     const token = localStorage.getItem("authToken");
-    const response = await axios.get(`/api/orders/${orderId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await axios.get(
+      `https://trailer-strore-server.onrender.com/api/orders/${orderId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response.data;
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.message || error.message);
@@ -111,12 +120,16 @@ export const addOrder = createAsyncThunk<
 >("orders/addOrder", async (newOrderData, { rejectWithValue }) => {
   try {
     const token = localStorage.getItem("authToken");
-    const response = await axios.post("/api/orders", newOrderData, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await axios.post(
+      "https://trailer-strore-server.onrender.com/api/orders",
+      newOrderData,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response.data;
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.message || error.message);
@@ -133,7 +146,7 @@ export const updateOrderStatus = createAsyncThunk<
     try {
       const token = localStorage.getItem("authToken");
       const response = await axios.put(
-        `/api/orders/${orderId}/status`,
+        `https://trailer-strore-server.onrender.com/api/orders/${orderId}/status`,
         { status },
         {
           headers: {
