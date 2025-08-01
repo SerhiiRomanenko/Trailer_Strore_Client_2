@@ -8,6 +8,7 @@ import { useAuth } from "../contexts/AuthContext";
 import Button from "./Button";
 import { RootState } from "../redux/store";
 import UserCircleIcon from "./icons/UserCircleIcon";
+import logo from "../components/icons/logo.png";
 
 interface HeaderProps {
   route: string;
@@ -95,7 +96,7 @@ const Header: React.FC<HeaderProps> = ({ route }) => {
                 className="flex items-center gap-2 text-3xl font-bold text-white tracking-wider font-['Roboto_Slab']"
               >
                 <img
-                  src="../components/icons/logo.png"
+                  src={logo}
                   alt="ПричепМаркет"
                   className="h-16 w-auto max-w-[160px] md:max-w-[120px] lg:max-w-[160px] object-contain"
                 />
