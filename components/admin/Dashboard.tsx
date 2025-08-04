@@ -6,9 +6,10 @@ import { useAuth } from "../../contexts/AuthContext";
 import { fetchAllOrders } from "../../redux/ordersSlice";
 import StatCard from "./StatCard";
 import DashboardIcon from "../icons/DashboardIcon";
-import PackageIcon from "../icons/PackageIcon";
+import PackageIcon from "../icons/PackageIcon"; // Використовуємо для Причепів
 import ClipboardListIcon from "../icons/ClipboardListIcon";
 import UsersIcon from "../icons/UsersIcon";
+import WrenchScrewdriverIcon from "../icons/WrenchScrewdriverIcon"; // Додаємо іконку для Комплектуючих
 
 import { fetchTrailers } from "../../redux/trailerSlice";
 import { fetchComponents } from "../../redux/componentSlice";
@@ -60,7 +61,7 @@ const Dashboard: React.FC = () => {
   );
   const totalOrders = orders.length;
   const totalUsers = users.length;
-  const totalProducts = trailers.length + components.length;
+  // const totalProducts = trailers.length + components.length; // Цей рядок більше не потрібен
 
   if (
     orderStatus === "loading" ||
@@ -84,7 +85,7 @@ const Dashboard: React.FC = () => {
         Панель керування
       </h1>
 
-      <div className="grid grid-cols-1 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard
           title="Загальний дохід"
           value={`${totalRevenue.toLocaleString("uk-UA")} UAH`}
@@ -104,10 +105,16 @@ const Dashboard: React.FC = () => {
           color="green"
         />
         <StatCard
-          title="Товари"
-          value={totalProducts.toString()}
+          title="Причепи"
+          value={trailers.length.toString()}
           icon={PackageIcon}
           color="purple"
+        />
+        <StatCard
+          title="Комплектуючі"
+          value={components.length.toString()}
+          icon={WrenchScrewdriverIcon}
+          color="teal" // Можна обрати інший колір
         />
       </div>
     </div>

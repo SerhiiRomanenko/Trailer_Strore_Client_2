@@ -1,7 +1,7 @@
-// src/components/ComponentFilters.tsx
 import React, { useState, ReactNode } from "react";
 import ChevronDownIcon from "./icons/ChevronDownIcon";
 
+// src/components/ComponentFilters.tsx
 export interface ComponentFiltersState {
   searchQuery: string;
   minPrice: string;
