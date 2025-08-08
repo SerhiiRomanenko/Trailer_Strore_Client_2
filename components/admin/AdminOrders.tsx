@@ -13,6 +13,8 @@ import SpinnerIcon from "../icons/SpinnerIcon";
 import TrashIcon from "../icons/TrashIcon";
 import Button from "../Button";
 
+const API_BASE_URL = import.meta.env.VITE_BASE_API_URL;
+
 const AdminOrders: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { setAuthMessage } = useAuth();
@@ -124,16 +126,13 @@ const AdminOrders: React.FC = () => {
 
     try {
       console.log(`Fetching details for order ID: ${orderId}`);
-      const response = await fetch(
-        `https://trailer-strore-server.onrender.com/api/orders/${orderId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (!response.ok) {
         const errorData = await response.json();

@@ -3,6 +3,8 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 import { Product } from "../types";
 
+const API_BASE_URL = import.meta.env.VITE_BASE_API_URL;
+
 interface TrailersState {
   list: Product[];
   currentProduct: Product | null;
@@ -23,9 +25,7 @@ export const fetchTrailers = createAsyncThunk<
   { rejectValue: string }
 >("trailers/fetchTrailers", async (_, { rejectWithValue }) => {
   try {
-    const response = await axios.get(
-      "https://trailer-strore-server.onrender.com/api/trailers"
-    );
+    const response = await axios.get(`${API_BASE_URL}/api/trailers`);
     return response.data;
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.message || error.message);
@@ -38,9 +38,7 @@ export const fetchTrailerById = createAsyncThunk<
   { rejectValue: string }
 >("trailers/fetchTrailerById", async (id, { rejectWithValue }) => {
   try {
-    const response = await axios.get(
-      `https://trailer-strore-server.onrender.com/api/trailers/${id}`
-    );
+    const response = await axios.get(`${API_BASE_URL}/api/trailers/${id}`);
     return response.data;
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.message || error.message);
@@ -54,7 +52,7 @@ export const fetchTrailerBySlug = createAsyncThunk<
 >("trailers/fetchTrailerBySlug", async (slug, { rejectWithValue }) => {
   try {
     const response = await axios.get(
-      `https://trailer-strore-server.onrender.com/api/trailers/slug/${slug}`
+      `${API_BASE_URL}/api/trailers/slug/${slug}`
     );
     return response.data;
   } catch (error: any) {
@@ -76,7 +74,7 @@ export const addTrailer = createAsyncThunk<
     }
 
     const response = await axios.post(
-      "https://trailer-strore-server.onrender.com/api/trailers",
+      `${API_BASE_URL}/api/trailers`,
       newTrailer,
       {
         headers: {
@@ -132,14 +130,11 @@ export const deleteTrailer = createAsyncThunk<
       );
     }
 
-    await axios.delete(
-      `https://trailer-strore-server.onrender.com/api/trailers/${trailerId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    await axios.delete(`${API_BASE_URL}/api/trailers/${trailerId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return trailerId;
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.message || error.message);

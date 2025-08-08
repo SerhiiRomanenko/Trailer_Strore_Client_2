@@ -12,8 +12,7 @@ import {
 } from "../redux/ordersSlice";
 import SpinnerIcon from "../components/icons/SpinnerIcon";
 
-// const API_BASE_URL = "http://localhost:5000/api";
-const API_BASE_URL = "https://trailer-strore-server.onrender.com/api";
+const API_BASE_URL = import.meta.env.VITE_BASE_API_URL;
 
 const MyOrdersPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -96,16 +95,13 @@ const MyOrdersPage: React.FC = () => {
 
     try {
       console.log(`Fetching details for order ID: ${orderId}`);
-      const response = await fetch(
-        `https://trailer-strore-server.onrender.com/api/orders/${orderId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (!response.ok) {
         const errorData = await response.json();

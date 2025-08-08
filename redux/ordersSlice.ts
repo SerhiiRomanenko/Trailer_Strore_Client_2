@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import { Product } from "../types";
+
+const API_BASE_URL = import.meta.env.VITE_BASE_API_URL;
 export interface OrderItem extends Product {
   quantity: number;
 }
@@ -55,14 +57,11 @@ export const fetchAllOrders = createAsyncThunk<
 >("orders/fetchAllOrders", async (_, { rejectWithValue }) => {
   try {
     const token = localStorage.getItem("authToken");
-    const response = await axios.get(
-      "https://trailer-strore-server.onrender.com/api/orders",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await axios.get(`${API_BASE_URL}/api/orders`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return response.data;
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.message || error.message);
@@ -76,14 +75,11 @@ export const fetchMyOrders = createAsyncThunk<
 >("orders/fetchMyOrders", async (_, { rejectWithValue }) => {
   try {
     const token = localStorage.getItem("authToken");
-    const response = await axios.get(
-      "https://trailer-strore-server.onrender.com/api/orders/my-orders",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await axios.get(`${API_BASE_URL}/api/orders/my-orders`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return response.data;
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.message || error.message);
@@ -98,14 +94,11 @@ export const fetchOrderById = createAsyncThunk<
 >("orders/fetchOrderById", async (orderId, { rejectWithValue }) => {
   try {
     const token = localStorage.getItem("authToken");
-    const response = await axios.get(
-      `https://trailer-strore-server.onrender.com/api/orders/${orderId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await axios.get(`${API_BASE_URL}/api/orders/${orderId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return response.data;
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.message || error.message);
@@ -121,7 +114,7 @@ export const addOrder = createAsyncThunk<
   try {
     const token = localStorage.getItem("authToken");
     const response = await axios.post(
-      "https://trailer-strore-server.onrender.com/api/orders",
+      `${API_BASE_URL}/api/orders`,
       newOrderData,
       {
         headers: {
@@ -146,7 +139,7 @@ export const updateOrderStatus = createAsyncThunk<
     try {
       const token = localStorage.getItem("authToken");
       const response = await axios.put(
-        `https://trailer-strore-server.onrender.com/api/orders/${orderId}/status`,
+        `${API_BASE_URL}/api/orders/${orderId}/status`,
         { status },
         {
           headers: {

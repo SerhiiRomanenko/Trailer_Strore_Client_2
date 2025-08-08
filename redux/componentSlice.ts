@@ -8,6 +8,7 @@ interface ComponentsState {
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
 }
+const API_BASE_URL = import.meta.env.VITE_BASE_API_URL;
 
 const initialState: ComponentsState = {
   list: [],
@@ -21,9 +22,7 @@ export const fetchComponents = createAsyncThunk<
   { rejectValue: string }
 >("components/fetchComponents", async (_, { rejectWithValue }) => {
   try {
-    const response = await axios.get(
-      "https://trailer-strore-server.onrender.com/api/components"
-    );
+    const response = await axios.get(`${API_BASE_URL}/api/components`);
     return response.data;
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.message || error.message);
@@ -44,7 +43,7 @@ export const addComponent = createAsyncThunk<
     }
 
     const response = await axios.post(
-      "https://trailer-strore-server.onrender.com/api/components",
+      `${API_BASE_URL}/api/components`,
       newComponentData,
       {
         headers: {
@@ -75,7 +74,7 @@ export const updateComponent = createAsyncThunk<
       }
 
       const response = await axios.put(
-        `https://trailer-strore-server.onrender.com/api/components/${updatedComponentData.id}`,
+        `${API_BASE_URL}/api/components/${updatedComponentData.id}`,
         updatedComponentData,
         {
           headers: {
@@ -104,14 +103,11 @@ export const deleteComponent = createAsyncThunk<
       );
     }
 
-    await axios.delete(
-      `https://trailer-strore-server.onrender.com/api/components/${componentId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    await axios.delete(`${API_BASE_URL}/api/components/${componentId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return componentId;
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.message || error.message);
@@ -125,7 +121,7 @@ export const fetchComponentById = createAsyncThunk<
 >("components/fetchComponentById", async (componentId, { rejectWithValue }) => {
   try {
     const response = await axios.get(
-      `https://trailer-strore-server.onrender.com/api/components/${componentId}`
+      `${API_BASE_URL}/api/components/${componentId}`
     );
     return response.data;
   } catch (error: any) {

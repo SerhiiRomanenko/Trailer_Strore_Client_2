@@ -8,8 +8,7 @@ import React, {
 } from "react";
 import { User } from "../types";
 
-// const API_BASE_URL = "http://localhost:5000/api";
-const API_BASE_URL = "https://trailer-strore-server.onrender.com/api";
+const API_BASE_URL = import.meta.env.VITE_BASE_API_URL;
 
 interface ProfileUpdateData {
   name?: string;
@@ -62,12 +61,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   const fetchCurrentUser = useCallback(async (authToken: string) => {
     try {
-      const response = await fetch(
-        `https://trailer-strore-server.onrender.com/api/auth/me`,
-        {
-          headers: { Authorization: `Bearer ${authToken}` },
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
       if (response.ok) {
         const user = await response.json();
         setCurrentUser(user);
@@ -125,14 +121,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     password: string
   ): Promise<boolean> => {
     try {
-      const response = await fetch(
-        `https://trailer-strore-server.onrender.com/api/auth/register`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, email, password }),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
       if (response.ok) {
         const data = await response.json();
         handleAuthResponse(data);
@@ -159,14 +152,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const response = await fetch(
-        `https://trailer-strore-server.onrender.com/api/auth/login`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
       if (response.ok) {
         const data = await response.json();
         handleAuthResponse(data);
@@ -209,17 +199,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     }
     try {
       console.log("Sending profile update request with data:", data);
-      const response = await fetch(
-        `https://trailer-strore-server.onrender.com/api/auth/me/profile`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(data),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/api/auth/me/profile`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
 
       console.log("Profile update response status:", response.status);
       const responseText = await response.text();
@@ -291,17 +278,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     }
     try {
       console.log("Sending password change request.");
-      const response = await fetch(
-        `https://trailer-strore-server.onrender.com/api/auth/me/password`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ oldPassword, newPassword }),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/api/auth/me/password`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ oldPassword, newPassword }),
+      });
 
       console.log("Password change response status:", response.status);
       const responseText = await response.text();
@@ -365,14 +349,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   const forgotPassword = async (email: string) => {
     try {
-      const response = await fetch(
-        `https://trailer-strore-server.onrender.com/api/auth/forgot-password`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
       const result = await response.json();
       if (response.ok) {
         setAuthMessage({
@@ -404,12 +385,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const fetchUsers = async () => {
     if (!token) return;
     try {
-      const response = await fetch(
-        `https://trailer-strore-server.onrender.com/api/users`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/api/users`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (response.ok) {
         const data = await response.json();
         setUsers(data);
@@ -445,17 +423,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       return false;
     }
     try {
-      const response = await fetch(
-        `https://trailer-strore-server.onrender.com/api/users/${userId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(data),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
       if (response.ok) {
         await fetchUsers();
         if (currentUser?.id === userId) {
@@ -503,13 +478,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       return false;
     }
     try {
-      const response = await fetch(
-        `https://trailer-strore-server.onrender.com/api/users/${userId}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (response.ok) {
         await fetchUsers();
         setAuthMessage({

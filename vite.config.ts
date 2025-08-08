@@ -20,8 +20,8 @@ export default defineConfig(({ mode }) => {
       proxy: {
         "/api": {
           // Всі запити, що починаються з '/api'
-          // target: "http://localhost:5000", // Перенаправляємо на ваш бекенд
-          target: "https://trailer-strore-server.onrender.com", // Перенаправляємо на ваш бекенд
+          target: "http://localhost:5000", // Перенаправляємо на ваш бекенд
+          // target: "https://trailer-strore-server.onrender.com", // Перенаправляємо на ваш бекенд
           changeOrigin: true, // Змінює заголовок Host на target URL
           secure: false, // Встановіть true, якщо ваш бекенд використовує HTTPS
         },
