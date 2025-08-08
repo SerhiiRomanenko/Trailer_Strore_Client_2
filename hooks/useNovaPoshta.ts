@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 
-const API_URL = "https://api.novaposhta.ua/v2.0/json/";
-const API_KEY: string = "62ed425a55417a2c220bbb9e19a6f7e8";
+const API_URL = import.meta.env.VITE_API_NOVAPOST_URL;
+const API_KEY: string = import.meta.env.VITE_API_NOVAPOST_KEY;
 
 export interface City {
   Description: string;
