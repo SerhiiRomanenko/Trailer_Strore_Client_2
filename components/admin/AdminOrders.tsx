@@ -32,6 +32,7 @@ const AdminOrders: React.FC = () => {
   const [orderToDeleteId, setOrderToDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
+    // Only fetch initially if idle
     if (orderStatus === "idle") {
       dispatch(fetchAllOrders());
     }
@@ -49,8 +50,8 @@ const AdminOrders: React.FC = () => {
         type: "success",
         text: `Статус замовлення ${orderId} оновлено на ${newStatus}`,
       });
-      // Re-fetch all orders to ensure the list is up-to-date
-      dispatch(fetchAllOrders());
+      // Removed: dispatch(fetchAllOrders());
+      // The updateOrderStatus thunk should ideally update the Redux state directly.
 
       // If the modal is open for this order, update its status
       if (showDetailsModal && selectedOrderForModal?.id === orderId) {
@@ -80,17 +81,20 @@ const AdminOrders: React.FC = () => {
   const confirmDelete = async () => {
     if (orderToDeleteId) {
       try {
+        // Close modal immediately to ensure smooth UI transition
+        setShowDeleteConfirmModal(false);
+        setOrderToDeleteId(null); // Clear the ID as well
+
         await dispatch(deleteOrder(orderToDeleteId)).unwrap();
         setAuthMessage({
           type: "success",
           text: `Замовлення ${orderToDeleteId} успішно видалено!`,
         });
-        // Re-fetch all orders to ensure the list is up-to-date
-        dispatch(fetchAllOrders());
-        // Close the delete confirmation modal
-        setShowDeleteConfirmModal(false);
-        setOrderToDeleteId(null);
+        // Removed: dispatch(fetchAllOrders());
+        // The deleteOrder thunk should ideally update the Redux state directly by removing the item.
       } catch (error: any) {
+        // If deletion fails, we might want to re-open the modal or show a message.
+        // For now, just set the error message.
         setAuthMessage({
           type: "error",
           text: `Помилка видалення замовлення: ${
