@@ -50,7 +50,8 @@ const AdminOrders: React.FC = () => {
         type: "success",
         text: `Статус замовлення ${orderId} оновлено на ${newStatus}`,
       });
-      // The updateOrderStatus thunk should ideally update the Redux state directly.
+      // Re-fetch all orders to ensure the list is up-to-date after status change
+      dispatch(fetchAllOrders());
 
       // If the modal is open for this order, update its status
       if (showDetailsModal && selectedOrderForModal?.id === orderId) {
@@ -89,7 +90,8 @@ const AdminOrders: React.FC = () => {
           type: "success",
           text: `Замовлення ${orderToDeleteId} успішно видалено!`,
         });
-        // The deleteOrder thunk should ideally update the Redux state directly by removing the item.
+        // Re-fetch all orders to ensure the list is up-to-date after deletion
+        dispatch(fetchAllOrders());
       } catch (error: any) {
         // If deletion fails, we might want to re-open the modal or show a message.
         // For now, just set the error message.
