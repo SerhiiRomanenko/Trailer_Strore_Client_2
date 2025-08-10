@@ -141,14 +141,21 @@ const ComponentDetailPage: React.FC<ComponentDetailPageProps> = ({ id }) => {
   const handleAddToCart = useCallback(() => {
     if (component) {
       dispatch(addToCart(component));
+      alert(`Комплектуюча додана в кошик.`);
     }
   }, [dispatch, component]);
 
   const handleToggleFavorite = useCallback(() => {
     if (component) {
+      const isCurrentlyFavorite = favoriteIds.has(component.id);
       dispatch(toggleFavorite(component.id));
+      alert(
+        isCurrentlyFavorite
+          ? "Комплектуюча видалена з обраного"
+          : "Комплектуюча додана в обране"
+      );
     }
-  }, [dispatch, component]);
+  }, [dispatch, component, favoriteIds]);
 
   const goToNextImage = useCallback(() => {
     if (component && component.images && component.images.length > 0) {

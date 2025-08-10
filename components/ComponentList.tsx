@@ -151,8 +151,13 @@ const ComponentList: React.FC = () => {
   const handleToggleFavorite = useCallback(
     (productId: string) => {
       dispatch(toggleFavorite(productId));
+      if (favoriteIds.has(productId)) {
+        alert("Комплектуюча видалена з обраного");
+      } else {
+        alert("Комплектуюча додана в обране");
+      }
     },
-    [dispatch]
+    [dispatch, favoriteIds]
   );
 
   const isLoading = status === "loading";

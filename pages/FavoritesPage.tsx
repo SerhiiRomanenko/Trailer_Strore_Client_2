@@ -48,9 +48,11 @@ const FavoritesPage: React.FC = () => {
 
   const handleToggleFavorite = useCallback(
     (productId: string) => {
+      const isCurrentlyFavorite = favoriteIds.has(productId);
+      alert(isCurrentlyFavorite && "Товар видалений з обраного");
       dispatch(toggleFavorite(productId));
     },
-    [dispatch]
+    [dispatch, favoriteIds]
   );
 
   const handleAddToCart = useCallback(

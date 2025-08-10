@@ -127,9 +127,15 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) => {
 
   const handleToggleFavorite = useCallback(() => {
     if (product) {
+      const isCurrentlyFavorite = favoriteIds.has(product.id);
       dispatch(toggleFavorite(product.id));
+      alert(
+        isCurrentlyFavorite
+          ? "Причіп видалений з обраного"
+          : "Причіп доданий в обране"
+      );
     }
-  }, [dispatch, product]);
+  }, [dispatch, product, favoriteIds]);
 
   const goToNextImage = useCallback(() => {
     if (product && product.images.length > 0) {

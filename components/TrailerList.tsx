@@ -25,6 +25,15 @@ const TrailerList: React.FC<TrailerListProps> = ({
   );
   const trailerError = useSelector((state: RootState) => state.trailers.error);
 
+  const handleToggleFavoriteWithAlert = (productId: string) => {
+    if (favoriteIds.has(productId)) {
+      alert("Причіп видалено з обраного");
+    } else {
+      alert("Причіп додано в обране");
+    }
+    onToggleFavorite(productId);
+  };
+
   useEffect(() => {
     if (trailerStatus === "idle" && products.length === 0) {
       dispatch(fetchTrailers());
@@ -62,7 +71,7 @@ const TrailerList: React.FC<TrailerListProps> = ({
           key={productItem.id}
           product={productItem}
           onAddToCart={onAddToCart}
-          onToggleFavorite={onToggleFavorite}
+          onToggleFavorite={handleToggleFavoriteWithAlert}
           isFavorite={favoriteIds.has(productItem.id)}
         />
       ))}
