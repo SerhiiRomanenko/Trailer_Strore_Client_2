@@ -353,7 +353,7 @@ const Header: React.FC<HeaderProps> = ({ route }) => {
                     variant="ghost"
                     className="flex-1"
                   >
-                    Login
+                    Вхід
                   </Button>
                   <Button
                     onClick={(e) => handleNav(e, "/register")}

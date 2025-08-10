@@ -49,7 +49,6 @@ const AdminPage: React.FC<AdminPageProps> = ({ route }) => {
       const componentId = route.split("/")[4];
       return <AdminComponentForm componentId={componentId} />;
     }
-
     if (route === "/admin/orders") {
       return <AdminOrders />;
     }
