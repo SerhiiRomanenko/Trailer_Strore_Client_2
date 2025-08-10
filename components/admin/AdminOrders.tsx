@@ -1,3 +1,4 @@
+// src/components/admin/AdminOrders.tsx
 import React, { useState, useEffect, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../../redux/store";
@@ -65,7 +66,6 @@ const AdminOrders: React.FC = () => {
   };
 
   const handleDeleteOrder = async (orderId: string) => {
-    // In a real app, use a custom modal like DeleteConfirmModal for users.
     if (
       window.confirm(
         "Ви впевнені, що хочете видалити це замовлення? Цю дію не можна скасувати."
@@ -161,15 +161,15 @@ const AdminOrders: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto p-4 md:p-6 bg-gray-100 min-h-screen">
-      <h1 className="text-2xl md:text-4xl font-extrabold text-gray-900 mb-6 md:mb-8 text-center">
+    <div className="container mx-auto p-6 bg-gray-100 min-h-screen">
+      <h1 className="text-4xl font-extrabold text-gray-900 mb-8 text-center">
         Керування замовленнями
       </h1>
 
-      <div className="mb-4 md:mb-6 bg-white p-4 md:p-6 rounded-lg shadow-md border border-gray-200">
+      <div className="mb-6 bg-white p-6 rounded-lg shadow-md border border-gray-200">
         <label
           htmlFor="status-filter"
-          className="block text-base md:text-lg font-medium text-gray-700 mb-2"
+          className="block text-lg font-medium text-gray-700 mb-2"
         >
           Фільтрувати за статусом:
         </label>
@@ -179,9 +179,9 @@ const AdminOrders: React.FC = () => {
           onChange={(e) =>
             setFilterStatus(e.target.value as OrderStatus | "All")
           }
-          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm
-                     focus:outline-none focus:ring-3 focus:ring-amber-500 focus:border-amber-500
-                     transition-all duration-200 ease-in-out text-sm md:text-base text-gray-800 bg-white hover:border-amber-400"
+          className="w-full md:w-auto px-5 py-2.5 border border-gray-300 rounded-lg shadow-sm
+                      focus:outline-none focus:ring-3 focus:ring-amber-500 focus:border-amber-500
+                      transition-all duration-200 ease-in-out text-base text-gray-800 bg-white hover:border-amber-400"
         >
           <option value="All">Всі</option>
           {statuses.map((status) => (
@@ -193,8 +193,8 @@ const AdminOrders: React.FC = () => {
       </div>
 
       <div className="bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden">
-        <div className="hidden md:block overflow-x-auto">
-          <table className="min-w-full text-sm text-left text-gray-600">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left text-gray-600">
             <thead className="text-xs text-gray-700 uppercase bg-gray-100 border-b border-gray-200">
               <tr>
                 <th
@@ -320,7 +320,7 @@ const AdminOrders: React.FC = () => {
                                        ? "bg-red-100 border-red-300 text-red-800 focus:ring-red-500"
                                        : ""
                                    }
-                                  `}
+                                 `}
                       >
                         {statuses.map((status) => (
                           <option key={status} value={status}>
@@ -345,116 +345,13 @@ const AdminOrders: React.FC = () => {
             </tbody>
           </table>
         </div>
-
-        <div className="md:hidden p-4">
-          {orderStatus === "loading" && (
-            <div className="text-center py-8 text-lg text-gray-600">
-              <SpinnerIcon className="h-8 w-8 text-amber-500 animate-spin mx-auto mb-2" />
-              Завантаження замовлень...
-            </div>
-          )}
-          {orderStatus !== "loading" && filteredOrders.length === 0 && (
-            <div className="text-center py-8 text-lg text-gray-600">
-              Замовлень не знайдено.
-            </div>
-          )}
-          {orderStatus !== "loading" &&
-            filteredOrders.map((order) => (
-              <div
-                key={order.id || `order-mobile-${Math.random()}`}
-                className="bg-white border-b last:border-b-0 p-4 mb-3 rounded-lg shadow-sm"
-              >
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2">
-                  <div className="flex-1 mb-2 sm:mb-0">
-                    <div
-                      className="font-bold text-gray-900 cursor-pointer hover:underline text-blue-600 text-base"
-                      onClick={() => openOrderDetailsModal(order.id)}
-                    >
-                      ID: {order.id}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      Дата:{" "}
-                      {order.date
-                        ? new Date(order.date).toLocaleString("uk-UA", {
-                            year: "numeric",
-                            month: "2-digit",
-                            day: "2-digit",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })
-                        : "N/A"}
-                    </div>
-                    <div className="text-sm text-gray-700">
-                      Клієнт: {order.customer?.name || "N/A"}
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-end sm:items-start">
-                    <div className="font-semibold text-gray-800 text-lg">
-                      {order.total !== undefined && order.total !== null
-                        ? `${order.total.toLocaleString("uk-UA")} грн`
-                        : "N/A"}
-                    </div>
-                    <select
-                      value={order.status}
-                      onChange={(e) =>
-                        handleStatusChange(
-                          order.id,
-                          e.target.value as OrderStatus
-                        )
-                      }
-                      className={`mt-1 p-2 text-sm font-semibold rounded-lg border-2 cursor-pointer
-                                 focus:outline-none focus:ring-2 focus:ring-offset-2
-                                 transition-all duration-200 ease-in-out
-                                 ${
-                                   order.status === "Delivered"
-                                     ? "bg-emerald-100 border-emerald-300 text-emerald-800 focus:ring-emerald-500"
-                                     : ""
-                                 }
-                                 ${
-                                   order.status === "Shipped"
-                                     ? "bg-blue-100 border-blue-300 text-blue-800 focus:ring-blue-500"
-                                     : ""
-                                 }
-                                 ${
-                                   order.status === "Processing"
-                                     ? "bg-amber-100 border-amber-300 text-amber-800 focus:ring-amber-500"
-                                     : ""
-                                 }
-                                 ${
-                                   order.status === "Cancelled"
-                                     ? "bg-red-100 border-red-300 text-red-800 focus:ring-red-500"
-                                     : ""
-                                 }
-                                `}
-                    >
-                      {statuses.map((status) => (
-                        <option key={status} value={status}>
-                          {status}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                {order.status === "Delivered" && (
-                  <div className="flex justify-end mt-2">
-                    <button
-                      onClick={() => handleDeleteOrder(order.id)}
-                      className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-100 rounded-full"
-                      aria-label="Видалити замовлення"
-                    >
-                      <TrashIcon className="h-4 w-4" />
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))}
-        </div>
       </div>
 
       {showDetailsModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-4 relative border border-gray-200 max-h-[95vh] overflow-y-auto">
-            <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-3 text-center">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-3 relative border border-gray-200 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-2xl font-bold text-gray-800 mb-3 text-center">
+              {" "}
               Деталі замовлення
             </h2>
             {modalLoading && (
@@ -472,13 +369,13 @@ const AdminOrders: React.FC = () => {
             )}
             {selectedOrderForModal && !modalLoading && !modalError && (
               <div className="overflow-x-auto">
-                <table className="min-w-full bg-white border border-gray-200 rounded-lg text-gray-700 text-sm mb-4">
+                <table className="min-w-full bg-white border border-gray-200 rounded-lg text-gray-700 text-sm">
                   <tbody>
                     <tr className="border-b border-gray-100">
                       <td className="px-3 py-1.5 font-semibold w-1/4">
                         ID Замовлення:
                       </td>
-                      <td className="px-3 py-1.5 break-words">
+                      <td className="px-3 py-1.5">
                         {selectedOrderForModal.id}
                       </td>
                     </tr>
@@ -591,7 +488,7 @@ const AdminOrders: React.FC = () => {
                                          ? "bg-red-100 border-red-300 text-red-800 focus:ring-red-500"
                                          : ""
                                      }
-                                    `}
+                                   `}
                         >
                           {statuses.map((status) => (
                             <option key={status} value={status}>
@@ -603,95 +500,90 @@ const AdminOrders: React.FC = () => {
                     </tr>
                   </tbody>
                 </table>
-                <h3 className="text-base md:text-xl font-bold text-gray-800 mt-3 mb-1">
-                  Товари в замовленні:
-                </h3>
-                {selectedOrderForModal?.items &&
-                selectedOrderForModal.items.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full bg-white border border-gray-200 rounded-lg">
-                      <thead>
-                        <tr className="bg-gray-50 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                          <th className="px-3 py-1.5 border-b-2 border-gray-200">
-                            Товар
-                          </th>
-                          <th className="px-3 py-1.5 border-b-2 border-gray-200 text-center">
-                            Кількість
-                          </th>
-                          <th className="px-3 py-1.5 border-b-2 border-gray-200 text-right">
-                            Ціна за одиницю
-                          </th>
-                          <th className="px-3 py-1.5 border-b-2 border-gray-200 text-right">
-                            Всього
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {selectedOrderForModal.items.map((item: any) => (
-                          <tr
-                            key={item.id}
-                            className="border-b border-gray-100 last:border-b-0"
-                          >
-                            <td className="px-3 py-1.5 whitespace-nowrap">
-                              <div className="flex items-center">
-                                {item.images && item.images.length > 0 && (
-                                  <img
-                                    src={item.images[0]}
-                                    alt={item.name}
-                                    className="w-10 h-10 object-cover rounded-md mr-2"
-                                  />
-                                )}
-                                <span className="text-gray-900 font-medium">
-                                  {item.name}
-                                </span>
-                              </div>
-                            </td>
-                            <td className="px-3 py-1.5 whitespace-nowrap text-center text-gray-700">
-                              {item.quantity}
-                            </td>
-                            <td className="px-3 py-1.5 whitespace-nowrap text-right text-gray-700">
-                              {item.price?.toLocaleString("uk-UA")}{" "}
-                              {item.currency}
-                            </td>
-                            <td className="px-3 py-1.5 whitespace-nowrap text-right text-gray-900 font-semibold">
-                              {(item.price * item.quantity).toLocaleString(
-                                "uk-UA"
-                              )}{" "}
-                              {item.currency}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                      <tfoot>
-                        <tr className="bg-gray-50 border-t-2 border-gray-200 text-right">
-                          <th
-                            colSpan={3}
-                            className="px-3 py-1.5 text-base font-semibold text-gray-800"
-                          >
-                            Загальна сума:
-                          </th>
-                          <td className="px-3 py-1.5 text-base font-bold text-gray-900">
-                            {selectedOrderForModal.total?.toLocaleString(
-                              "uk-UA"
-                            )}{" "}
-                            грн
-                          </td>
-                        </tr>
-                      </tfoot>
-                    </table>
-                  </div>
-                ) : (
-                  <p className="text-center text-gray-500 py-4">
-                    Немає товарів у цьому замовленні.
-                  </p>
-                )}
-                <div className="mt-4 flex justify-end">
-                  <Button onClick={closeOrderDetailsModal} variant="secondary">
-                    Закрити
-                  </Button>
-                </div>
               </div>
             )}
+            <h3 className="text-xl font-bold text-gray-800 mt-3 mb-1">
+              Товари в замовленні:
+            </h3>
+            {selectedOrderForModal?.items &&
+            selectedOrderForModal.items.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="min-w-full bg-white border border-gray-200 rounded-lg">
+                  <thead>
+                    <tr className="bg-gray-50 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <th className="px-3 py-1.5 border-b-2 border-gray-200">
+                        Товар
+                      </th>
+                      <th className="px-3 py-1.5 border-b-2 border-gray-200 text-center">
+                        Кількість
+                      </th>
+                      <th className="px-3 py-1.5 border-b-2 border-gray-200 text-right">
+                        Ціна за одиницю
+                      </th>
+                      <th className="px-3 py-1.5 border-b-2 border-gray-200 text-right">
+                        Всього
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedOrderForModal.items.map((item: any) => (
+                      <tr
+                        key={item.id}
+                        className="border-b border-gray-100 last:border-b-0"
+                      >
+                        <td className="px-3 py-1.5 whitespace-nowrap">
+                          <div className="flex items-center">
+                            {item.images && item.images.length > 0 && (
+                              <img
+                                src={item.images[0]}
+                                alt={item.name}
+                                className="w-10 h-10 object-cover rounded-md mr-2"
+                              />
+                            )}
+                            <span className="text-gray-900 font-medium">
+                              {item.name}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-3 py-1.5 whitespace-nowrap text-center text-gray-700">
+                          {item.quantity}
+                        </td>
+                        <td className="px-3 py-1.5 whitespace-nowrap text-right text-gray-700">
+                          {item.price?.toLocaleString("uk-UA")} {item.currency}
+                        </td>
+                        <td className="px-3 py-1.5 whitespace-nowrap text-right text-gray-900 font-semibold">
+                          {(item.price * item.quantity).toLocaleString("uk-UA")}{" "}
+                          {item.currency}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr className="bg-gray-50 border-t-2 border-gray-200 text-right">
+                      <th
+                        colSpan={3}
+                        className="px-3 py-1.5 text-base font-semibold text-gray-800"
+                      >
+                        Загальна сума:
+                      </th>
+                      <td className="px-3 py-1.5 text-base font-bold text-gray-900">
+                        {selectedOrderForModal.total?.toLocaleString("uk-UA")}{" "}
+                        грн
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            ) : (
+              <p className="text-center text-gray-500 py-4">
+                Немає товарів у цьому замовленні.
+              </p>
+            )}
+            <div className="mt-4 flex justify-end">
+              <Button onClick={closeOrderDetailsModal} variant="secondary">
+                Закрити
+              </Button>
+            </div>
           </div>
         </div>
       )}
