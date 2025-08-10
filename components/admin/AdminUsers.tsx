@@ -137,7 +137,7 @@ const DeleteConfirmModal: React.FC<{
   </div>
 );
 
-const API_URL = "/api/users";
+const API_BASE_URL = import.meta.env.VITE_BASE_API_URL;
 
 const AdminUsers: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -158,7 +158,7 @@ const AdminUsers: React.FC = () => {
         throw new Error("Токен авторизації відсутній. Будь ласка, увійдіть.");
       }
 
-      const res = await fetch(API_URL, {
+      const res = await fetch(API_BASE_URL, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -185,7 +185,7 @@ const AdminUsers: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      const res = await fetch(`${API_URL}/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -204,7 +204,7 @@ const AdminUsers: React.FC = () => {
 
   const handleEditSave = async (updatedUser: User) => {
     try {
-      const res = await fetch(`${API_URL}/${updatedUser._id}`, {
+      const res = await fetch(`${API_BASE_URL}/${updatedUser._id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
