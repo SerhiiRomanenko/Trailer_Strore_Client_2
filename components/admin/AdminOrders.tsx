@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../../redux/store";
 import {
@@ -10,7 +10,7 @@ import {
 import { useAuth } from "../../contexts/AuthContext";
 import SpinnerIcon from "../icons/SpinnerIcon";
 import TrashIcon from "../icons/TrashIcon";
-import Button from "../Button";
+import Button from "../Button"; // Assuming you have a Button component
 
 const API_BASE_URL = import.meta.env.VITE_BASE_API_URL;
 
@@ -26,6 +26,10 @@ const AdminOrders: React.FC = () => {
   const [selectedOrderForModal, setSelectedOrderForModal] = useState<any>(null);
   const [modalLoading, setModalLoading] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
+
+  // New state for custom delete confirmation modal
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [orderToDeleteId, setOrderToDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     if (orderStatus === "idle") {
@@ -45,8 +49,10 @@ const AdminOrders: React.FC = () => {
         type: "success",
         text: `Статус замовлення ${orderId} оновлено на ${newStatus}`,
       });
+      // Re-fetch all orders to ensure the list is up-to-date
       dispatch(fetchAllOrders());
 
+      // If the modal is open for this order, update its status
       if (showDetailsModal && selectedOrderForModal?.id === orderId) {
         setSelectedOrderForModal((prev: any) => ({
           ...prev,
@@ -64,19 +70,26 @@ const AdminOrders: React.FC = () => {
     }
   };
 
-  const handleDeleteOrder = async (orderId: string) => {
-    if (
-      window.confirm(
-        "Ви впевнені, що хочете видалити це замовлення? Цю дію не можна скасувати."
-      )
-    ) {
+  // Function to initiate delete confirmation
+  const initiateDeleteOrder = useCallback((orderId: string) => {
+    setOrderToDeleteId(orderId);
+    setShowDeleteConfirmModal(true);
+  }, []);
+
+  // Function to confirm and execute deletion
+  const confirmDelete = async () => {
+    if (orderToDeleteId) {
       try {
-        await dispatch(deleteOrder(orderId)).unwrap();
+        await dispatch(deleteOrder(orderToDeleteId)).unwrap();
         setAuthMessage({
           type: "success",
-          text: `Замовлення ${orderId} успішно видалено!`,
+          text: `Замовлення ${orderToDeleteId} успішно видалено!`,
         });
+        // Re-fetch all orders to ensure the list is up-to-date
         dispatch(fetchAllOrders());
+        // Close the delete confirmation modal
+        setShowDeleteConfirmModal(false);
+        setOrderToDeleteId(null);
       } catch (error: any) {
         setAuthMessage({
           type: "error",
@@ -89,11 +102,17 @@ const AdminOrders: React.FC = () => {
     }
   };
 
+  // Function to cancel deletion
+  const cancelDelete = useCallback(() => {
+    setShowDeleteConfirmModal(false);
+    setOrderToDeleteId(null);
+  }, []);
+
   const filteredOrders = useMemo(() => {
     const sorted = [...orders].sort((a, b) => {
       const dateA = new Date(a.date).getTime();
       const dateB = new Date(b.date).getTime();
-      return dateB - dateA;
+      return dateB - dateA; // Sort in descending order (newest first)
     });
     return sorted.filter(
       (order) => filterStatus === "All" || order.status === filterStatus
@@ -125,18 +144,37 @@ const AdminOrders: React.FC = () => {
 
     try {
       console.log(`Fetching details for order ID: ${orderId}`);
-      const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      // Implement exponential backoff for API calls
+      const MAX_RETRIES = 3;
+      let retries = 0;
+      let response;
+      while (retries < MAX_RETRIES) {
+        try {
+          response = await fetch(`${API_BASE_URL}/api/orders/${orderId}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          if (response.ok) break; // Exit loop if successful
+        } catch (fetchError) {
+          console.error(`Attempt ${retries + 1} failed:`, fetchError);
+        }
+        retries++;
+        if (retries < MAX_RETRIES) {
+          await new Promise((res) =>
+            setTimeout(res, Math.pow(2, retries) * 100)
+          ); // Exponential backoff
+        }
+      }
 
-      if (!response.ok) {
-        const errorData = await response.json();
+      if (!response || !response.ok) {
+        const errorData = response
+          ? await response.json()
+          : { message: "Network error or API unavailable" };
         throw new Error(
-          errorData.message || `Помилка HTTP: ${response.status}`
+          errorData.message || `Помилка HTTP: ${response?.status || "Unknown"}`
         );
       }
 
@@ -160,7 +198,7 @@ const AdminOrders: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto p-4 md:p-6 bg-gray-100 min-h-screen">
+    <div className="container mx-auto p-4 md:p-6 bg-gray-100 min-h-screen font-sans">
       <h1 className="text-2xl md:text-4xl font-extrabold text-gray-900 mb-6 md:mb-8 text-center">
         Керування замовленнями
       </h1>
@@ -192,6 +230,7 @@ const AdminOrders: React.FC = () => {
       </div>
 
       <div className="bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden">
+        {/* Desktop Table View */}
         <div className="hidden md:block overflow-x-auto">
           <table className="min-w-full text-sm text-left text-gray-600">
             <thead className="text-xs text-gray-700 uppercase bg-gray-100 border-b border-gray-200">
@@ -228,7 +267,7 @@ const AdminOrders: React.FC = () => {
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-4 font-semibold text-gray-800"
+                  className="px-6 py-4 font-semibold text-gray-800 text-right"
                 >
                   Дії
                 </th>
@@ -319,7 +358,7 @@ const AdminOrders: React.FC = () => {
                                        ? "bg-red-100 border-red-300 text-red-800 focus:ring-red-500"
                                        : ""
                                    }
-                                  `}
+                                `}
                       >
                         {statuses.map((status) => (
                           <option key={status} value={status}>
@@ -331,7 +370,7 @@ const AdminOrders: React.FC = () => {
                     <td className="px-6 py-4 text-right">
                       {order.status === "Delivered" && (
                         <button
-                          onClick={() => handleDeleteOrder(order.id)}
+                          onClick={() => initiateDeleteOrder(order.id)} // Use the new initiate function
                           className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-100 rounded-full"
                           aria-label="Видалити замовлення"
                         >
@@ -345,6 +384,7 @@ const AdminOrders: React.FC = () => {
           </table>
         </div>
 
+        {/* Mobile Card View */}
         <div className="md:hidden p-4">
           {orderStatus === "loading" && (
             <div className="text-center py-8 text-lg text-gray-600">
@@ -402,28 +442,28 @@ const AdminOrders: React.FC = () => {
                         )
                       }
                       className={`mt-1 p-2 text-sm font-semibold rounded-lg border-2 cursor-pointer
-                                 focus:outline-none focus:ring-2 focus:ring-offset-2
-                                 transition-all duration-200 ease-in-out
-                                 ${
-                                   order.status === "Delivered"
-                                     ? "bg-emerald-100 border-emerald-300 text-emerald-800 focus:ring-emerald-500"
-                                     : ""
-                                 }
-                                 ${
-                                   order.status === "Shipped"
-                                     ? "bg-blue-100 border-blue-300 text-blue-800 focus:ring-blue-500"
-                                     : ""
-                                 }
-                                 ${
-                                   order.status === "Processing"
-                                     ? "bg-amber-100 border-amber-300 text-amber-800 focus:ring-amber-500"
-                                     : ""
-                                 }
-                                 ${
-                                   order.status === "Cancelled"
-                                     ? "bg-red-100 border-red-300 text-red-800 focus:ring-red-500"
-                                     : ""
-                                 }
+                                   focus:outline-none focus:ring-2 focus:ring-offset-2
+                                   transition-all duration-200 ease-in-out
+                                   ${
+                                     order.status === "Delivered"
+                                       ? "bg-emerald-100 border-emerald-300 text-emerald-800 focus:ring-emerald-500"
+                                       : ""
+                                   }
+                                   ${
+                                     order.status === "Shipped"
+                                       ? "bg-blue-100 border-blue-300 text-blue-800 focus:ring-blue-500"
+                                       : ""
+                                   }
+                                   ${
+                                     order.status === "Processing"
+                                       ? "bg-amber-100 border-amber-300 text-amber-800 focus:ring-amber-500"
+                                       : ""
+                                   }
+                                   ${
+                                     order.status === "Cancelled"
+                                       ? "bg-red-100 border-red-300 text-red-800 focus:ring-red-500"
+                                       : ""
+                                   }
                                 `}
                     >
                       {statuses.map((status) => (
@@ -437,7 +477,7 @@ const AdminOrders: React.FC = () => {
                 {order.status === "Delivered" && (
                   <div className="flex justify-end mt-2">
                     <button
-                      onClick={() => handleDeleteOrder(order.id)}
+                      onClick={() => initiateDeleteOrder(order.id)} // Use the new initiate function
                       className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-100 rounded-full"
                       aria-label="Видалити замовлення"
                     >
@@ -450,6 +490,7 @@ const AdminOrders: React.FC = () => {
         </div>
       </div>
 
+      {/* Order Details Modal */}
       {showDetailsModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-4 relative border border-gray-200 max-h-[95vh] overflow-y-auto">
@@ -564,32 +605,32 @@ const AdminOrders: React.FC = () => {
                             )
                           }
                           className={`p-2 text-sm font-semibold rounded-lg border-2 cursor-pointer
-                                     focus:outline-none focus:ring-2 focus:ring-offset-2
-                                     transition-all duration-200 ease-in-out
-                                     ${
-                                       selectedOrderForModal.status ===
-                                       "Delivered"
-                                         ? "bg-emerald-100 border-emerald-300 text-emerald-800 focus:ring-emerald-500"
-                                         : ""
-                                     }
-                                     ${
-                                       selectedOrderForModal.status ===
-                                       "Shipped"
-                                         ? "bg-blue-100 border-blue-300 text-blue-800 focus:ring-blue-500"
-                                         : ""
-                                     }
-                                     ${
-                                       selectedOrderForModal.status ===
-                                       "Processing"
-                                         ? "bg-amber-100 border-amber-300 text-amber-800 focus:ring-amber-500"
-                                         : ""
-                                     }
-                                     ${
-                                       selectedOrderForModal.status ===
-                                       "Cancelled"
-                                         ? "bg-red-100 border-red-300 text-red-800 focus:ring-red-500"
-                                         : ""
-                                     }
+                                       focus:outline-none focus:ring-2 focus:ring-offset-2
+                                       transition-all duration-200 ease-in-out
+                                       ${
+                                         selectedOrderForModal.status ===
+                                         "Delivered"
+                                           ? "bg-emerald-100 border-emerald-300 text-emerald-800 focus:ring-emerald-500"
+                                           : ""
+                                       }
+                                       ${
+                                         selectedOrderForModal.status ===
+                                         "Shipped"
+                                           ? "bg-blue-100 border-blue-300 text-blue-800 focus:ring-blue-500"
+                                           : ""
+                                       }
+                                       ${
+                                         selectedOrderForModal.status ===
+                                         "Processing"
+                                           ? "bg-amber-100 border-amber-300 text-amber-800 focus:ring-amber-500"
+                                           : ""
+                                       }
+                                       ${
+                                         selectedOrderForModal.status ===
+                                         "Cancelled"
+                                           ? "bg-red-100 border-red-300 text-red-800 focus:ring-red-500"
+                                           : ""
+                                       }
                                     `}
                         >
                           {statuses.map((status) => (
@@ -691,6 +732,32 @@ const AdminOrders: React.FC = () => {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Custom Delete Confirmation Modal */}
+      {showDeleteConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6 relative border border-gray-200">
+            <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-4 text-center">
+              Підтвердження видалення
+            </h2>
+            <p className="text-gray-700 text-center mb-6">
+              Ви впевнені, що хочете видалити замовлення{" "}
+              <span className="font-semibold text-gray-900">
+                {orderToDeleteId}
+              </span>
+              ? Цю дію не можна скасувати.
+            </p>
+            <div className="flex justify-center gap-4">
+              <Button onClick={cancelDelete} variant="secondary">
+                Відмінити
+              </Button>
+              <Button onClick={confirmDelete} variant="danger">
+                Видалити
+              </Button>
+            </div>
           </div>
         </div>
       )}
