@@ -163,7 +163,7 @@ export const deleteOrder = createAsyncThunk<
 >("orders/deleteOrder", async (orderId, { rejectWithValue }) => {
   try {
     const token = localStorage.getItem("authToken");
-    await axios.delete(`/api/orders/${orderId}`, {
+    await axios.delete(`${API_BASE_URL}/api/orders/${orderId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
