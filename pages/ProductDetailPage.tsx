@@ -1,4 +1,3 @@
-// src/pages/ProductDetailPage.tsx
 import React, { useState, useCallback, useEffect, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../redux/store";
@@ -132,6 +131,21 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) => {
     }
   }, [dispatch, product]);
 
+  const goToNextImage = useCallback(() => {
+    if (product && product.images.length > 0) {
+      setActiveImage((prevIndex) => (prevIndex + 1) % product.images.length);
+    }
+  }, [product]);
+
+  const goToPrevImage = useCallback(() => {
+    if (product && product.images.length > 0) {
+      setActiveImage(
+        (prevIndex) =>
+          (prevIndex - 1 + product.images.length) % product.images.length
+      );
+    }
+  }, [product]);
+
   if (productStatus === "loading") {
     return (
       <div className="flex justify-center items-center py-20">
@@ -176,31 +190,71 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) => {
     <div className="bg-white p-4 sm:p-8 rounded-xl shadow-lg border border-slate-200">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
         <div>
-          <div className="mb-4 rounded-lg overflow-hidden border border-slate-200 shadow-sm">
+          <div className="mb-4 rounded-lg overflow-hidden border border-slate-200 shadow-sm relative">
             <img
               src={product.images[activeImage]}
               alt={`${product.name} - Image ${activeImage + 1}`}
               className="w-full h-96 object-cover"
             />
+
+            {product.images.length > 1 && (
+              <>
+                <div
+                  onClick={goToPrevImage}
+                  className="absolute left-0 top-0 h-full w-[70px] bg-white bg-opacity-20 cursor-pointer flex items-center justify-center transition-colors hover:bg-opacity-30 z-10"
+                  aria-label="Попереднє зображення"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-8 w-8 text-black opacity-60"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </div>
+                <div
+                  onClick={goToNextImage}
+                  className="absolute right-0 top-0 h-full w-[70px] bg-white bg-opacity-20 cursor-pointer flex items-center justify-center transition-colors hover:bg-opacity-30 z-10"
+                  aria-label="Наступне зображення"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-8 w-8 text-black opacity-60"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </div>
+              </>
+            )}
           </div>
           {product.images.length > 1 && (
-            <div className="flex gap-2">
-              {product.images.map((img, index) => (
+            <div className="flex gap-2 justify-center mt-2">
+              {product.images.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setActiveImage(index)}
-                  className={`w-20 h-20 rounded-md overflow-hidden border-2 transition-all ${
+                  className={`w-3 h-3 rounded-full transition-colors ${
                     activeImage === index
-                      ? "border-orange-500 shadow-md"
-                      : "border-slate-200 hover:border-orange-400"
+                      ? "bg-orange-500"
+                      : "bg-slate-300 hover:bg-slate-400"
                   }`}
-                >
-                  <img
-                    src={img}
-                    alt={`Thumbnail ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
+                  aria-label={`Перейти до зображення ${index + 1}`}
+                ></button>
               ))}
             </div>
           )}

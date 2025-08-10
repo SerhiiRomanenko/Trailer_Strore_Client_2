@@ -235,6 +235,7 @@ const AdminComponentForm: React.FC<AdminComponentFormProps> = ({
           type: "success",
           text: "Комплектуючу успішно оновлено!",
         });
+        alert("✅ Комплектуючу успішно оновлено!");
       } else {
         const slug = finalProductData.name
           .toLowerCase()
@@ -252,6 +253,7 @@ const AdminComponentForm: React.FC<AdminComponentFormProps> = ({
           type: "success",
           text: "Комплектуючу успішно додано!",
         });
+        alert("✅ Комплектуючу успішно додано!");
       }
       handleNavigation("/admin/accessories");
     } catch (e: any) {

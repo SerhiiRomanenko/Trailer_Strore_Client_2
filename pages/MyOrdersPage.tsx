@@ -56,8 +56,7 @@ const MyOrdersPage: React.FC = () => {
   if (authLoading || orderStatus === "loading") {
     return (
       <div className="flex justify-center items-center py-20">
-        <SpinnerIcon className="h-10 w-10 text-amber-500 animate-spin" />{" "}
-        {/* Додано animate-spin */}
+        <SpinnerIcon className="h-10 w-10 text-amber-500 animate-spin" />
         <p className="ml-3 text-lg text-slate-700">Завантаження замовлень...</p>
       </div>
     );
@@ -131,11 +130,6 @@ const MyOrdersPage: React.FC = () => {
   };
 
   const handleCancelOrder = async (orderId: string) => {
-    setAuthMessage({
-      type: "info",
-      text: "Ви впевнені, що хочете скасувати це замовлення? Цю дію не можна буде скасувати.",
-    });
-
     if (
       window.confirm(
         "Ви впевнені, що хочете скасувати це замовлення? Цю дію не можна буде скасувати."
@@ -163,8 +157,8 @@ const MyOrdersPage: React.FC = () => {
   };
 
   return (
-    <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-gray-200">
-      <h1 className="text-3xl font-extrabold text-gray-900 mb-6">
+    <div className="bg-white p-4 sm:p-8 rounded-xl shadow-lg border border-gray-200">
+      <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-6">
         Мої замовлення
       </h1>
 
@@ -178,43 +172,88 @@ const MyOrdersPage: React.FC = () => {
           </Button>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="border-b-2 border-gray-200">
-              <tr>
-                <th className="px-4 py-3 font-semibold text-gray-600">Номер</th>
-                <th className="px-4 py-3 font-semibold text-gray-600">Дата</th>
-                <th className="px-4 py-3 font-semibold text-gray-600 text-right">
-                  Сума
-                </th>
-                <th className="px-4 py-3 font-semibold text-gray-600 text-center">
-                  Статус
-                </th>
-                <th className="px-4 py-3 font-semibold text-gray-600 text-center">
-                  Дії
-                </th>{" "}
-              </tr>
-            </thead>
-            <tbody>
-              {sortedUserOrders.map((order) => (
-                <tr
-                  key={order.id}
-                  className="border-b border-gray-200 hover:bg-gray-50"
-                >
-                  <td
-                    className="px-4 py-4 font-medium text-gray-500 cursor-pointer hover:underline text-blue-600"
-                    onClick={() => openOrderDetailsModal(order.id)}
+        <>
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="border-b-2 border-gray-200">
+                <tr>
+                  <th className="px-4 py-3 font-semibold text-gray-600">
+                    Номер
+                  </th>
+                  <th className="px-4 py-3 font-semibold text-gray-600">
+                    Дата
+                  </th>
+                  <th className="px-4 py-3 font-semibold text-gray-600 text-right">
+                    Сума
+                  </th>
+                  <th className="px-4 py-3 font-semibold text-gray-600 text-center">
+                    Статус
+                  </th>
+                  <th className="px-4 py-3 font-semibold text-gray-600 text-center">
+                    Дії
+                  </th>{" "}
+                </tr>
+              </thead>
+              <tbody>
+                {sortedUserOrders.map((order) => (
+                  <tr
+                    key={order.id}
+                    className="border-b border-gray-200 hover:bg-gray-50"
                   >
-                    {" "}
-                    {order.id}
-                  </td>
-                  <td className="px-4 py-4 text-gray-800">
-                    {new Date(order.date).toLocaleDateString("uk-UA")}
-                  </td>
-                  <td className="px-4 py-4 font-semibold text-gray-900 text-right">
-                    {order.total.toLocaleString("uk-UA")} UAH
-                  </td>
-                  <td className="px-4 py-4 text-center">
+                    <td
+                      className="px-4 py-4 font-medium text-gray-500 cursor-pointer hover:underline text-blue-600"
+                      onClick={() => openOrderDetailsModal(order.id)}
+                    >
+                      {" "}
+                      {order.id}
+                    </td>
+                    <td className="px-4 py-4 text-gray-800">
+                      {new Date(order.date).toLocaleDateString("uk-UA")}
+                    </td>
+                    <td className="px-4 py-4 font-semibold text-gray-900 text-right">
+                      {order.total.toLocaleString("uk-UA")} UAH
+                    </td>
+                    <td className="px-4 py-4 text-center">
+                      <span
+                        className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                          statusClasses[order.status]
+                        }`}
+                      >
+                        {order.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 text-center">
+                      {(order.status === "Processing" ||
+                        order.status === "Shipped") && (
+                        <button
+                          onClick={() => handleCancelOrder(order.id)}
+                          className="px-3 py-1 text-sm font-semibold rounded-md bg-red-500 text-white hover:bg-red-600 transition-colors"
+                          aria-label="Скасувати замовлення"
+                        >
+                          Скасувати
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="md:hidden">
+            <div className="grid gap-4">
+              {sortedUserOrders.map((order) => (
+                <div
+                  key={order.id}
+                  className="bg-gray-50 border border-gray-200 rounded-lg p-4 shadow-sm"
+                >
+                  <div className="flex justify-between items-center mb-2">
+                    <span
+                      className="text-sm font-semibold text-blue-600 hover:underline cursor-pointer"
+                      onClick={() => openOrderDetailsModal(order.id)}
+                    >
+                      Замовлення №{order.id.substring(0, 8)}...
+                    </span>
                     <span
                       className={`px-3 py-1 text-xs font-semibold rounded-full ${
                         statusClasses[order.status]
@@ -222,31 +261,36 @@ const MyOrdersPage: React.FC = () => {
                     >
                       {order.status}
                     </span>
-                  </td>
-                  <td className="px-4 py-4 text-center">
-                    {" "}
-                    {(order.status === "Processing" ||
-                      order.status === "Shipped") && (
+                  </div>
+                  <div className="text-gray-600 text-sm mb-1">
+                    **Дата:** {new Date(order.date).toLocaleDateString("uk-UA")}
+                  </div>
+                  <div className="text-gray-900 font-bold text-lg mb-3">
+                    **Сума:** {order.total.toLocaleString("uk-UA")} UAH
+                  </div>
+                  {(order.status === "Processing" ||
+                    order.status === "Shipped") && (
+                    <div className="flex justify-end">
                       <button
                         onClick={() => handleCancelOrder(order.id)}
-                        className="px-3 py-1 text-sm font-semibold rounded-md bg-red-500 text-white hover:bg-red-600 transition-colors"
+                        className="w-full px-4 py-2 text-sm font-semibold rounded-md bg-red-500 text-white hover:bg-red-600 transition-colors"
                         aria-label="Скасувати замовлення"
                       >
                         Скасувати
                       </button>
-                    )}
-                  </td>
-                </tr>
+                    </div>
+                  )}
+                </div>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </div>
+          </div>
+        </>
       )}
 
       {showDetailsModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-3 relative border border-gray-200 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold text-gray-800 mb-3 text-center">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-4 relative border border-gray-200 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3 text-center">
               Деталі замовлення
             </h2>
             {modalLoading && (
@@ -266,13 +310,13 @@ const MyOrdersPage: React.FC = () => {
               <div className="overflow-x-auto">
                 <table className="min-w-full bg-white border border-gray-200 rounded-lg text-gray-700 text-sm">
                   <tbody>
-                    <tr className="border-b border-gray-100">
+                    <tr className="flex flex-col sm:table-row border-b border-gray-100">
                       <td className="px-3 py-1.5 font-semibold w-1/4">
                         ID Замовлення:
                       </td>
                       <td className="px-3 py-1.5">{currentOrder.id}</td>
                     </tr>
-                    <tr className="border-b border-gray-100">
+                    <tr className="flex flex-col sm:table-row border-b border-gray-100">
                       <td className="px-3 py-1.5 font-semibold">Дата:</td>
                       <td
                         className="px-3 py-1.5"
@@ -294,13 +338,13 @@ const MyOrdersPage: React.FC = () => {
                         }}
                       />
                     </tr>
-                    <tr className="border-b border-gray-100">
+                    <tr className="flex flex-col sm:table-row border-b border-gray-100">
                       <td className="px-3 py-1.5 font-semibold">Клієнт:</td>
                       <td className="px-3 py-1.5">
                         {currentOrder.customer?.name || "N/A"}
                       </td>
                     </tr>
-                    <tr className="border-b border-gray-100">
+                    <tr className="flex flex-col sm:table-row border-b border-gray-100">
                       <td className="px-3 py-1.5 font-semibold">Телефон:</td>
                       <td className="px-3 py-1.5">
                         <a
@@ -311,7 +355,7 @@ const MyOrdersPage: React.FC = () => {
                         </a>
                       </td>
                     </tr>
-                    <tr className="border-b border-gray-100">
+                    <tr className="flex flex-col sm:table-row border-b border-gray-100">
                       <td className="px-3 py-1.5 font-semibold">Пошта:</td>
                       <td className="px-3 py-1.5">
                         <a
@@ -322,7 +366,7 @@ const MyOrdersPage: React.FC = () => {
                         </a>
                       </td>
                     </tr>
-                    <tr className="border-b border-gray-100">
+                    <tr className="flex flex-col sm:table-row border-b border-gray-100">
                       <td className="px-3 py-1.5 font-semibold">Доставка:</td>
                       <td className="px-3 py-1.5">
                         {currentOrder.delivery?.method === "pickup"
@@ -332,7 +376,7 @@ const MyOrdersPage: React.FC = () => {
                             }, ${currentOrder.delivery?.branchName || "N/A"}`}
                       </td>
                     </tr>
-                    <tr className="border-b border-gray-100">
+                    <tr className="flex flex-col sm:table-row border-b border-gray-100">
                       <td className="px-3 py-1.5 font-semibold">Оплата:</td>
                       <td className="px-3 py-1.5">
                         {currentOrder.payment?.method === "cash"
@@ -340,32 +384,32 @@ const MyOrdersPage: React.FC = () => {
                           : "Картка"}
                       </td>
                     </tr>
-                    <tr>
+                    <tr className="flex flex-col sm:table-row">
                       <td className="px-3 py-1.5 font-semibold">Статус:</td>
                       <td className="px-3 py-1.5">
                         <span
                           className={`p-2 text-sm font-semibold rounded-lg border-2
-                                     ${
-                                       currentOrder.status === "Delivered"
-                                         ? "bg-emerald-100 border-emerald-300 text-emerald-800"
-                                         : ""
-                                     }
-                                     ${
-                                       currentOrder.status === "Shipped"
-                                         ? "bg-blue-100 border-blue-300 text-blue-800"
-                                         : ""
-                                     }
-                                     ${
-                                       currentOrder.status === "Processing"
-                                         ? "bg-amber-100 border-amber-300 text-amber-800"
-                                         : ""
-                                     }
-                                     ${
-                                       currentOrder.status === "Cancelled"
-                                         ? "bg-red-100 border-red-300 text-red-800"
-                                         : ""
-                                     }
-                                  `}
+                            ${
+                              currentOrder.status === "Delivered"
+                                ? "bg-emerald-100 border-emerald-300 text-emerald-800"
+                                : ""
+                            }
+                            ${
+                              currentOrder.status === "Shipped"
+                                ? "bg-blue-100 border-blue-300 text-blue-800"
+                                : ""
+                            }
+                            ${
+                              currentOrder.status === "Processing"
+                                ? "bg-amber-100 border-amber-300 text-amber-800"
+                                : ""
+                            }
+                            ${
+                              currentOrder.status === "Cancelled"
+                                ? "bg-red-100 border-red-300 text-red-800"
+                                : ""
+                            }
+                          `}
                         >
                           {currentOrder.status}
                         </span>
@@ -374,12 +418,12 @@ const MyOrdersPage: React.FC = () => {
                   </tbody>
                 </table>
 
-                <h3 className="text-xl font-bold text-gray-800 mt-3 mb-1">
+                <h3 className="text-base sm:text-xl font-bold text-gray-800 mt-3 mb-1">
                   Товари в замовленні:
                 </h3>
                 {currentOrder.items && currentOrder.items.length > 0 ? (
                   <div className="overflow-x-auto">
-                    <table className="min-w-full bg-white border border-gray-200 rounded-lg">
+                    <table className="min-w-full bg-white border border-gray-200 rounded-lg text-sm">
                       <thead>
                         <tr className="bg-gray-50 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                           <th className="px-3 py-1.5 border-b-2 border-gray-200">
@@ -436,11 +480,11 @@ const MyOrdersPage: React.FC = () => {
                         <tr className="bg-gray-50 border-t-2 border-gray-200 text-right">
                           <th
                             colSpan={3}
-                            className="px-3 py-1.5 text-base font-semibold text-gray-800"
+                            className="px-3 py-1.5 text-sm sm:text-base font-semibold text-gray-800"
                           >
                             Загальна сума:
                           </th>
-                          <td className="px-3 py-1.5 text-base font-bold text-gray-900">
+                          <td className="px-3 py-1.5 text-sm sm:text-base font-bold text-gray-900">
                             {currentOrder.total?.toLocaleString("uk-UA")} грн
                           </td>
                         </tr>

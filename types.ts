@@ -1,4 +1,4 @@
-// types.ts (оновлено)
+// types.ts
 export interface Specification {
   name: string;
   value: string;
@@ -16,8 +16,7 @@ export interface Product {
   model?: string;
   category: "Причепи" | "Комплектуючі";
   subCategory?: string;
-  type: "trailer" | "component"; // <--- ЗМІНЕНО ТУТ! або додайте "product", якщо воно все ще потрібне для інших категорій
-  price: number;
+  type: "trailer" | "component";
   currency: string;
   inStock: boolean;
   quantity: number;

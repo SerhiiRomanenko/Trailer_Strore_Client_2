@@ -1,4 +1,4 @@
-// src/components/admin/AdminSidebar.tsx (виправлений)
+// src/components/admin/AdminSidebar.tsx
 import React from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import DashboardIcon from "../icons/DashboardIcon";
@@ -93,7 +93,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       >
         <div className="flex justify-between items-center mb-8 md:hidden">
           <div className="text-2xl font-bold text-gray-900 px-2">
-            Admin Panel
+            Адмін панель
           </div>
           <button
             onClick={() => setIsOpen(false)}
@@ -106,7 +106,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
         <div className="md:block">
           <div className="text-2xl font-bold text-gray-900 mb-8 px-2 hidden md:block">
             <a href="/admin" onClick={(e) => handleNav(e, "/admin")}>
-              Admin Panel
+              Адмін панель
             </a>
           </div>
           <nav>

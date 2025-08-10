@@ -69,14 +69,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         setCurrentUser(user);
       } else {
         console.warn("Failed to fetch current user, logging out.");
-        logout();
+        setCurrentUser(null);
+        setToken(null);
+        localStorage.removeItem("authToken");
       }
     } catch (error) {
       console.error(
         "Failed to fetch current user (network error or server issue):",
         error
       );
-      logout();
+      setCurrentUser(null);
+      setToken(null);
+      localStorage.removeItem("authToken");
     } finally {
       setLoading(false);
     }
@@ -111,71 +115,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       localStorage.setItem("authToken", data.token);
     } else {
       console.error("handleAuthResponse received invalid data:", data);
-      logout();
-    }
-  };
-
-  const register = async (
-    name: string,
-    email: string,
-    password: string
-  ): Promise<boolean> => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
-      });
-      if (response.ok) {
-        const data = await response.json();
-        handleAuthResponse(data);
-        setAuthMessage({ type: "success", text: "Реєстрація успішна!" });
-        return true;
-      } else {
-        const error = await response.json();
-        setAuthMessage({
-          type: "error",
-          text: `Помилка реєстрації: ${error.message || response.statusText}`,
-        });
-        return false;
-      }
-    } catch (error: any) {
-      setAuthMessage({
-        type: "error",
-        text: `Запит на реєстрацію не вдався: ${
-          error.message || "Мережева помилка"
-        }`,
-      });
-      return false;
-    }
-  };
-
-  const login = async (email: string, password: string): Promise<boolean> => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      if (response.ok) {
-        const data = await response.json();
-        handleAuthResponse(data);
-        setAuthMessage({ type: "success", text: "Вхід успішний!" });
-        return true;
-      } else {
-        const error = await response.json();
-        setAuthMessage({
-          type: "error",
-          text: `Помилка входу: ${error.message || response.statusText}`,
-        });
-        return false;
-      }
-    } catch (error: any) {
-      setAuthMessage({
-        type: "error",
-        text: `Запит на вхід не вдався: ${error.message || "Мережева помилка"}`,
-      });
-      return false;
+      setCurrentUser(null);
+      setToken(null);
+      localStorage.removeItem("authToken");
     }
   };
 
@@ -184,206 +126,281 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     setToken(null);
     localStorage.removeItem("authToken");
     setAuthMessage({ type: "info", text: "Ви вийшли з облікового запису." });
-  }, []);
+  }, [setAuthMessage]);
 
-  const updateMyProfile = async (data: ProfileUpdateData) => {
-    if (!token) {
-      setAuthMessage({
-        type: "error",
-        text: "Не авторизовано. Будь ласка, увійдіть.",
-      });
-      return {
-        success: false,
-        message: "Не авторизовано. Будь ласка, увійдіть.",
-      };
-    }
-    try {
-      console.log("Sending profile update request with data:", data);
-      const response = await fetch(`${API_BASE_URL}/api/auth/me/profile`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(data),
-      });
-
-      console.log("Profile update response status:", response.status);
-      const responseText = await response.text();
-      console.log("Profile update response raw text:", responseText);
-
+  const register = useCallback(
+    async (name: string, email: string, password: string): Promise<boolean> => {
       try {
-        const result = JSON.parse(responseText);
-        console.log("Profile update response parsed JSON:", result);
-
+        const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, password }),
+        });
         if (response.ok) {
-          handleAuthResponse(result);
+          const data = await response.json();
+          handleAuthResponse(data);
+          setAuthMessage({ type: "success", text: "Реєстрація успішна!" });
+          return true;
+        } else {
+          const error = await response.json();
           setAuthMessage({
-            type: "success",
-            text: result.message || "Профіль успішно оновлено.",
+            type: "error",
+            text: `Помилка реєстрації: ${error.message || response.statusText}`,
           });
-          return {
-            success: true,
-            message: result.message || "Профіль успішно оновлено.",
-          };
+          return false;
         }
+      } catch (error: any) {
         setAuthMessage({
           type: "error",
-          text: result.message || "Не вдалося оновити профіль.",
+          text: `Запит на реєстрацію не вдався: ${
+            error.message || "Мережева помилка"
+          }`,
+        });
+        return false;
+      }
+    },
+    [setAuthMessage]
+  );
+
+  const login = useCallback(
+    async (email: string, password: string): Promise<boolean> => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+        if (response.ok) {
+          const data = await response.json();
+          handleAuthResponse(data);
+          setAuthMessage({ type: "success", text: "Вхід успішний!" });
+          return true;
+        } else {
+          const error = await response.json();
+          setAuthMessage({
+            type: "error",
+            text: `Помилка входу: ${error.message || response.statusText}`,
+          });
+          return false;
+        }
+      } catch (error: any) {
+        setAuthMessage({
+          type: "error",
+          text: `Запит на вхід не вдався: ${
+            error.message || "Мережева помилка"
+          }`,
+        });
+        return false;
+      }
+    },
+    [setAuthMessage]
+  );
+
+  const updateMyProfile = useCallback(
+    async (data: ProfileUpdateData) => {
+      if (!token) {
+        setAuthMessage({
+          type: "error",
+          text: "Не авторизовано. Будь ласка, увійдіть.",
         });
         return {
           success: false,
-          message: result.message || "Не вдалося оновити профіль.",
-        };
-      } catch (jsonError: any) {
-        console.error("Failed to parse JSON response:", jsonError);
-        setAuthMessage({
-          type: "error",
-          text: `Помилка: Отримано недійсний формат відповіді від сервера. Можливо, зображення завелике. (${responseText.substring(
-            0,
-            100
-          )}...)`,
-        });
-        return {
-          success: false,
-          message: `Недійсний формат відповіді від сервера: ${jsonError.message}`,
+          message: "Не авторизовано. Будь ласка, увійдіть.",
         };
       }
-    } catch (error: any) {
-      console.error(
-        "Profile update request failed (network/other error):",
-        error
-      );
-      setAuthMessage({
-        type: "error",
-        text: error.message || "Помилка запиту на оновлення профілю.",
-      });
-      return {
-        success: false,
-        message: error.message || "Помилка запиту на оновлення профілю.",
-      };
-    }
-  };
-
-  const changePassword = async (oldPassword: string, newPassword: string) => {
-    if (!token) {
-      setAuthMessage({
-        type: "error",
-        text: "Не авторизовано. Будь ласка, увійдіть.",
-      });
-      return {
-        success: false,
-        message: "Не авторизовано. Будь ласка, увійдіть.",
-      };
-    }
-    try {
-      console.log("Sending password change request.");
-      const response = await fetch(`${API_BASE_URL}/api/auth/me/password`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ oldPassword, newPassword }),
-      });
-
-      console.log("Password change response status:", response.status);
-      const responseText = await response.text();
-      console.log("Password change response raw text:", responseText);
-
       try {
-        const result = JSON.parse(responseText);
-        console.log("Password change response parsed JSON:", result);
+        const response = await fetch(`${API_BASE_URL}/api/auth/me/profile`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(data),
+        });
 
-        if (response.ok) {
-          handleAuthResponse(result);
+        const responseText = await response.text();
+
+        try {
+          const result = JSON.parse(responseText);
+
+          if (response.ok) {
+            handleAuthResponse(result);
+            setAuthMessage({
+              type: "success",
+              text: result.message || "Профіль успішно оновлено.",
+            });
+            return {
+              success: true,
+              message: result.message || "Профіль успішно оновлено.",
+            };
+          }
           setAuthMessage({
-            type: "success",
-            text: result.message || "Пароль успішно змінено.",
+            type: "error",
+            text: result.message || "Не вдалося оновити профіль.",
           });
           return {
-            success: true,
-            message: result.message || "Пароль успішно змінено.",
+            success: false,
+            message: result.message || "Не вдалося оновити профіль.",
+          };
+        } catch (jsonError: any) {
+          console.error("Failed to parse JSON response:", jsonError);
+          setAuthMessage({
+            type: "error",
+            text: `Помилка: Отримано недійсний формат відповіді від сервера. Можливо, зображення завелике. (${responseText.substring(
+              0,
+              100
+            )}...)`,
+          });
+          return {
+            success: false,
+            message: `Недійсний формат відповіді від сервера: ${jsonError.message}`,
           };
         }
-        setAuthMessage({
-          type: "error",
-          text: result.message || "Не вдалося змінити пароль.",
-        });
-        return {
-          success: false,
-          message: result.message || "Не вдалося змінити пароль.",
-        };
-      } catch (jsonError: any) {
+      } catch (error: any) {
         console.error(
-          "Failed to parse JSON response for password change:",
-          jsonError
+          "Profile update request failed (network/other error):",
+          error
         );
         setAuthMessage({
           type: "error",
-          text: `Помилка: Отримано недійсний формат відповіді від сервера при зміні пароля. (${responseText.substring(
-            0,
-            100
-          )}...)`,
+          text: error.message || "Помилка запиту на оновлення профілю.",
         });
         return {
           success: false,
-          message: `Недійсний формат відповіді від сервера: ${jsonError.message}`,
+          message: error.message || "Помилка запиту на оновлення профілю.",
         };
       }
-    } catch (error: any) {
-      console.error(
-        "Password change request failed (network/other error):",
-        error
-      );
-      setAuthMessage({
-        type: "error",
-        text: error.message || "Помилка запиту на зміну пароля.",
-      });
-      return {
-        success: false,
-        message: error.message || "Помилка запиту на зміну пароля.",
-      };
-    }
-  };
+    },
+    [token, setAuthMessage]
+  );
 
-  const forgotPassword = async (email: string) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      const result = await response.json();
-      if (response.ok) {
-        setAuthMessage({
-          type: "success",
-          text:
-            result.message ||
-            "Інструкції для відновлення пароля надіслано на вашу пошту.",
-        });
-      } else {
+  const changePassword = useCallback(
+    async (oldPassword: string, newPassword: string) => {
+      if (!token) {
         setAuthMessage({
           type: "error",
-          text: result.message || "Не вдалося відновити пароль.",
+          text: "Не авторизовано. Будь ласка, увійдіть.",
         });
+        return {
+          success: false,
+          message: "Не авторизовано. Будь ласка, увійдіть.",
+        };
       }
-      return { success: response.ok, message: result.message };
-    } catch (error: any) {
-      console.error("Forgot password request failed:", error);
-      setAuthMessage({
-        type: "error",
-        text: error.message || "Помилка запиту на відновлення пароля.",
-      });
-      return {
-        success: false,
-        message: error.message || "Помилка запиту на відновлення пароля.",
-      };
-    }
-  };
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/auth/me/password`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ oldPassword, newPassword }),
+        });
 
-  const fetchUsers = async () => {
-    if (!token) return;
+        const responseText = await response.text();
+
+        try {
+          const result = JSON.parse(responseText);
+
+          if (response.ok) {
+            handleAuthResponse(result);
+            setAuthMessage({
+              type: "success",
+              text: result.message || "Пароль успішно змінено.",
+            });
+            return {
+              success: true,
+              message: result.message || "Пароль успішно змінено.",
+            };
+          }
+          setAuthMessage({
+            type: "error",
+            text: result.message || "Не вдалося змінити пароль.",
+          });
+          return {
+            success: false,
+            message: result.message || "Не вдалося змінити пароль.",
+          };
+        } catch (jsonError: any) {
+          console.error(
+            "Failed to parse JSON response for password change:",
+            jsonError
+          );
+          setAuthMessage({
+            type: "error",
+            text: `Помилка: Отримано недійсний формат відповіді від сервера при зміні пароля. (${responseText.substring(
+              0,
+              100
+            )}...)`,
+          });
+          return {
+            success: false,
+            message: `Недійсний формат відповіді від сервера: ${jsonError.message}`,
+          };
+        }
+      } catch (error: any) {
+        console.error(
+          "Password change request failed (network/other error):",
+          error
+        );
+        setAuthMessage({
+          type: "error",
+          text: error.message || "Помилка запиту на зміну пароля.",
+        });
+        return {
+          success: false,
+          message: error.message || "Помилка запиту на зміну пароля.",
+        };
+      }
+    },
+    [token, setAuthMessage]
+  );
+
+  const forgotPassword = useCallback(
+    async (email: string) => {
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/api/auth/forgot-password`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+          }
+        );
+        const result = await response.json();
+        if (response.ok) {
+          setAuthMessage({
+            type: "success",
+            text:
+              result.message ||
+              "Інструкції для відновлення пароля надіслано на вашу пошту.",
+          });
+        } else {
+          setAuthMessage({
+            type: "error",
+            text: result.message || "Не вдалося відновити пароль.",
+          });
+        }
+        return { success: response.ok, message: result.message };
+      } catch (error: any) {
+        console.error("Forgot password request failed:", error);
+        setAuthMessage({
+          type: "error",
+          text: error.message || "Помилка запиту на відновлення пароля.",
+        });
+        return {
+          success: false,
+          message: error.message || "Помилка запиту на відновлення пароля.",
+        };
+      }
+    },
+    [setAuthMessage]
+  );
+
+  const fetchUsers = useCallback(async () => {
+    if (!token) {
+      setUsers([]);
+      return;
+    }
     try {
       const response = await fetch(`${API_BASE_URL}/api/users`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -409,110 +426,113 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         text: `Мережева помилка при завантаженні користувачів: ${error}`,
       });
     }
-  };
+  }, [token, setUsers, setAuthMessage]);
 
-  const updateUser = async (
-    userId: string,
-    data: Partial<User>
-  ): Promise<boolean> => {
-    if (!token) {
-      setAuthMessage({
-        type: "error",
-        text: "Не авторизовано для оновлення користувача.",
-      });
-      return false;
-    }
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(data),
-      });
-      if (response.ok) {
-        await fetchUsers();
-        if (currentUser?.id === userId) {
-          await fetchCurrentUser(token);
+  const updateUser = useCallback(
+    async (userId: string, data: Partial<User>): Promise<boolean> => {
+      if (!token) {
+        setAuthMessage({
+          type: "error",
+          text: "Не авторизовано для оновлення користувача.",
+        });
+        return false;
+      }
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(data),
+        });
+        if (response.ok) {
+          await fetchUsers();
+          if (currentUser?.id === userId && token) {
+            await fetchCurrentUser(token);
+          }
+          setAuthMessage({
+            type: "success",
+            text: "Користувача успішно оновлено.",
+          });
+          return true;
         }
+        const errorResult = await response.json();
+        console.error(
+          "Failed to update user:",
+          response.status,
+          response.statusText,
+          errorResult
+        );
         setAuthMessage({
-          type: "success",
-          text: "Користувача успішно оновлено.",
+          type: "error",
+          text: `Не вдалося оновити користувача: ${
+            errorResult.message || response.statusText
+          }`,
         });
-        return true;
+        return false;
+      } catch (error: any) {
+        console.error("Failed to update user (network error):", error);
+        setAuthMessage({
+          type: "error",
+          text: `Мережева помилка при оновленні користувача: ${error.message}`,
+        });
+        return false;
       }
-      const errorResult = await response.json();
-      console.error(
-        "Failed to update user:",
-        response.status,
-        response.statusText,
-        errorResult
-      );
-      setAuthMessage({
-        type: "error",
-        text: `Не вдалося оновити користувача: ${
-          errorResult.message || response.statusText
-        }`,
-      });
-      return false;
-    } catch (error: any) {
-      console.error("Failed to update user (network error):", error);
-      setAuthMessage({
-        type: "error",
-        text: `Мережева помилка при оновленні користувача: ${error.message}`,
-      });
-      return false;
-    }
-  };
+    },
+    [token, currentUser, fetchUsers, fetchCurrentUser, setAuthMessage]
+  );
 
-  const deleteUser = async (userId: string): Promise<boolean> => {
-    if (!token || currentUser?.id === userId) {
-      console.warn(
-        "Cannot delete user: Not authenticated or attempting to delete self."
-      );
-      setAuthMessage({
-        type: "error",
-        text: "Неможливо видалити користувача: не авторизовано або спроба видалити себе.",
-      });
-      return false;
-    }
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (response.ok) {
-        await fetchUsers();
+  const deleteUser = useCallback(
+    async (userId: string): Promise<boolean> => {
+      if (!token || currentUser?.id === userId) {
+        console.warn(
+          "Cannot delete user: Not authenticated or attempting to delete self."
+        );
         setAuthMessage({
-          type: "success",
-          text: "Користувача успішно видалено.",
+          type: "error",
+          text: "Неможливо видалити користувача: не авторизовано або спроба видалити себе.",
         });
-        return true;
+        return false;
       }
-      const errorResult = await response.json();
-      console.error(
-        "Failed to delete user:",
-        response.status,
-        response.statusText,
-        errorResult
-      );
-      setAuthMessage({
-        type: "error",
-        text: `Не вдалося видалити користувача: ${
-          errorResult.message || response.statusText
-        }`,
-      });
-      return false;
-    } catch (error: any) {
-      console.error("Failed to delete user (network error):", error);
-      setAuthMessage({
-        type: "error",
-        text: `Мережева помилка при видаленні користувача: ${error.message}`,
-      });
-      return false;
-    }
-  };
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (response.ok) {
+          await fetchUsers();
+          setAuthMessage({
+            type: "success",
+            text: "Користувача успішно видалено.",
+          });
+          return true;
+        }
+        const errorResult = await response.json();
+        console.error(
+          "Failed to delete user:",
+          response.status,
+          response.statusText,
+          errorResult
+        );
+        setAuthMessage({
+          type: "error",
+          text: `Не вдалося видалити користувача: ${
+            errorResult.message || response.statusText
+          }`,
+        });
+        return false;
+      } catch (error: any) {
+        console.error("Failed to delete user (network error):", error);
+        setAuthMessage({
+          type: "error",
+          text: `Мережева помилка при видаленні користувача: ${error.message}`,
+        });
+        return false;
+      }
+    },
+    [token, currentUser, fetchUsers, setAuthMessage]
+  );
 
   return (
     <AuthContext.Provider

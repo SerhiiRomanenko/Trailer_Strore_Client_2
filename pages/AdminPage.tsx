@@ -1,4 +1,4 @@
-// src/pages/AdminPage.tsx (виправлений)
+// src/pages/AdminPage.tsx
 import React, { useState } from "react";
 import AdminSidebar from "../components/admin/AdminSidebar";
 import Dashboard from "../components/admin/Dashboard";
@@ -6,7 +6,6 @@ import AdminProducts from "../components/admin/AdminProducts";
 import AdminProductForm from "../components/admin/AdminProductForm";
 import AdminOrders from "../components/admin/AdminOrders";
 import AdminUsers from "../components/admin/AdminUsers";
-import AdminUserForm from "../components/admin/AdminUserForm";
 import AdminAccessories from "../components/admin/AdminAccessories";
 import AdminComponentForm from "../components/admin/AdminComponentForm";
 
@@ -50,13 +49,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ route }) => {
       const componentId = route.split("/")[4];
       return <AdminComponentForm componentId={componentId} />;
     }
-    if (route.startsWith("/admin/user/edit/")) {
-      const userId = route.split("/")[4];
-      return <AdminUserForm userId={userId} />;
-    }
-    if (route === "/admin/user/new") {
-      return <AdminUserForm />;
-    }
+
     if (route === "/admin/orders") {
       return <AdminOrders />;
     }

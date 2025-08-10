@@ -287,6 +287,7 @@ const AdminProductForm: React.FC<AdminProductFormProps> = ({
           type: "success",
           text: `${productType} успішно оновлено!`,
         });
+        alert("✅ Причіп успішно оновлено!");
       } else {
         const slug = finalProductData.name
           .toLowerCase()
@@ -308,6 +309,7 @@ const AdminProductForm: React.FC<AdminProductFormProps> = ({
           type: "success",
           text: `${productType} успішно додано!`,
         });
+        alert("✅ Причіп успішно додано!");
       }
       handleNavigation(
         productType === "Причепи" ? "/admin/products" : "/admin/accessories"

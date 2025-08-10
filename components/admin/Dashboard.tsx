@@ -9,7 +9,7 @@ import DashboardIcon from "../icons/DashboardIcon";
 import PackageIcon from "../icons/PackageIcon"; // Використовуємо для Причепів
 import ClipboardListIcon from "../icons/ClipboardListIcon";
 import UsersIcon from "../icons/UsersIcon";
-import WrenchScrewdriverIcon from "../icons/WrenchScrewdriverIcon"; // Додаємо іконку для Комплектуючих
+import WrenchScrewdriverIcon from "../icons/WrenchScrewdriverIcon";
 
 import { fetchTrailers } from "../../redux/trailerSlice";
 import { fetchComponents } from "../../redux/componentSlice";
@@ -61,7 +61,6 @@ const Dashboard: React.FC = () => {
   );
   const totalOrders = orders.length;
   const totalUsers = users.length;
-  // const totalProducts = trailers.length + components.length; // Цей рядок більше не потрібен
 
   if (
     orderStatus === "loading" ||

@@ -33,7 +33,7 @@ const STEPS = ["Контактна інформація", "Доставка і �
 
 const CheckoutPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { currentUser, setAuthMessage } = useAuth(); // Додано setAuthMessage для відображення повідомлень
+  const { currentUser, setAuthMessage } = useAuth();
   const cartItems = useSelector((state: RootState) => state.cart.items);
 
   const [currentStep, setCurrentStep] = useState(1);

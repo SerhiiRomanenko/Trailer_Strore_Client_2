@@ -264,7 +264,7 @@ const Header: React.FC<HeaderProps> = ({ route }) => {
                 onClick={(e) => handleNav(e, "/admin")}
                 className={mobileNavLinkClasses("/admin")}
               >
-                Адмін
+                Адмін панель
               </a>
             )}
             {currentUser && (

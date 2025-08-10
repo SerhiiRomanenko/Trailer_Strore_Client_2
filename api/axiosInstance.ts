@@ -4,7 +4,6 @@ import axios from "axios";
 // const API_BASE_URL = "http://localhost:5000/api";
 const API_BASE_URL = import.meta.env.VITE_BASE_API_URL;
 
-// Створюємо екземпляр Axios
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -12,14 +11,11 @@ const axiosInstance = axios.create({
   },
 });
 
-// Додаємо інтерцептор запитів
-// Цей інтерцептор буде виконуватися перед кожним запитом,
-// дозволяючи нам додати токен авторизації, якщо він існує.
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("authToken"); // Отримуємо токен з localStorage
+    const token = localStorage.getItem("authToken");
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`; // Додаємо токен до заголовка Authorization
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
