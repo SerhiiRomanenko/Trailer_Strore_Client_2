@@ -137,7 +137,7 @@ const DeleteConfirmModal: React.FC<{
   </div>
 );
 
-const API_BASE_URL = import.meta.env.VITE_BASE_API_URL;
+const API_BASE_URL = import.meta.env.VITE_BASE_API_URL + "/admin/users";
 
 const AdminUsers: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
