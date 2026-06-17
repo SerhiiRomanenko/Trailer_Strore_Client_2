@@ -12,7 +12,7 @@ import SpinnerIcon from "../icons/SpinnerIcon";
 import TrashIcon from "../icons/TrashIcon";
 import Button from "../Button"; // Assuming you have a Button component
 
-const API_BASE_URL = import.meta.env.VITE_BASE_API_URL;
+const API_BASE_URL = import.meta.env.VITE_BASE_API_URL || "https://trailer-strore-server.onrender.com";
 
 const AdminOrders: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();

@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import { Product } from "../types";
 
-const API_BASE_URL = import.meta.env.VITE_BASE_API_URL;
+const API_BASE_URL = import.meta.env.VITE_BASE_API_URL || "https://trailer-strore-server.onrender.com";
 export interface OrderItem extends Product {
   quantity: number;
 }

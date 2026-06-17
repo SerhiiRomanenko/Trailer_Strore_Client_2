@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Search, Edit, Trash2 } from "lucide-react";
 
-const API_URL = `${import.meta.env.VITE_BASE_API_URL}/api/users`;
+const API_URL = `${import.meta.env.VITE_BASE_API_URL || "https://trailer-strore-server.onrender.com"}/api/users`;
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);

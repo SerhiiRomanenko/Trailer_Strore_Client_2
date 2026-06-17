@@ -8,7 +8,7 @@ interface ComponentsState {
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
 }
-const API_BASE_URL = import.meta.env.VITE_BASE_API_URL;
+const API_BASE_URL = import.meta.env.VITE_BASE_API_URL || "https://trailer-strore-server.onrender.com";
 
 const initialState: ComponentsState = {
   list: [],
@@ -140,7 +140,7 @@ const componentSlice = createSlice({
       })
       .addCase(fetchComponents.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.list = action.payload;
+        state.list = Array.isArray(action.payload) ? action.payload : [];
       })
       .addCase(fetchComponents.rejected, (state, action) => {
         state.status = "failed";

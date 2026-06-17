@@ -62,7 +62,8 @@ const HomePage: React.FC = () => {
   const { allBrands, allSuspensionTypes } = useMemo(() => {
     const brands = new Set<string>();
     const suspensionTypes = new Set<string>();
-    trailers?.forEach((product) => {
+    if (!Array.isArray(trailers)) return { allBrands: [], allSuspensionTypes: [] };
+    trailers.forEach((product) => {
       brands.add(product.brand);
       const suspensionSpec = product.specifications.find(
         (spec) => spec.name === "Тип підвіски"

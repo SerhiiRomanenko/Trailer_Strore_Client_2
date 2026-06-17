@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import { User } from "../types";
 
-const API_BASE_URL = import.meta.env.VITE_BASE_API_URL;
+const API_BASE_URL = import.meta.env.VITE_BASE_API_URL || "https://trailer-strore-server.onrender.com";
 
 interface ProfileUpdateData {
   name?: string;

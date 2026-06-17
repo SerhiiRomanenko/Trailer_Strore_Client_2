@@ -20,6 +20,8 @@ dist-ssr
 
 # Screenshots / misc
 screenshot.png
+screenshot*.mjs
+ss.mjs
 run_local_claude*.ps1
 
 # Editor directories and files
