@@ -1,33 +1,17 @@
-import React, { useState, ReactNode } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import React, { ReactNode } from "react";
 
 interface FilterSectionProps {
   title: string;
   children: ReactNode;
-  defaultOpen?: boolean;
 }
 
-const FilterSection: React.FC<FilterSectionProps> = ({ title, children, defaultOpen = true }) => {
-  const [open, setOpen] = useState(defaultOpen);
-
-  return (
-    <div className="border-b border-[var(--color-border)] last:border-b-0">
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between py-2.5 text-left"
-      >
-        <span className="text-[13px] font-semibold text-[var(--color-text)]">{title}</span>
-        {open ? (
-          <ChevronUp className="h-3.5 w-3.5 text-[var(--color-text-tertiary)]" />
-        ) : (
-          <ChevronDown className="h-3.5 w-3.5 text-[var(--color-text-tertiary)]" />
-        )}
-      </button>
-      <div className={`overflow-hidden transition-all duration-200 ${open ? "max-h-[400px] pb-3" : "max-h-0"}`}>
-        {children}
-      </div>
-    </div>
-  );
-};
+const FilterSection: React.FC<FilterSectionProps> = ({ title, children }) => (
+  <div className="py-3 border-b border-[var(--color-border)] last:border-b-0">
+    <h3 className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-text-tertiary)] mb-2.5">
+      {title}
+    </h3>
+    {children}
+  </div>
+);
 
 export default FilterSection;

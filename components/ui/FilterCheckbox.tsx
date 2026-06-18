@@ -7,14 +7,33 @@ interface FilterCheckboxProps {
 }
 
 const FilterCheckbox: React.FC<FilterCheckboxProps> = ({ checked, onChange, label }) => (
-  <label className="flex items-center gap-2 cursor-pointer py-0.5 group">
-    <input
-      type="checkbox"
-      checked={checked}
-      onChange={onChange}
-      className="h-3.5 w-3.5 rounded border-[var(--color-border)] text-[var(--color-primary)] focus:ring-[var(--color-primary)] focus:ring-offset-0"
-    />
-    <span className="text-[13px] text-[var(--color-text-secondary)] group-hover:text-[var(--color-text)] transition-colors">
+  <label
+    className={`flex items-center gap-2.5 cursor-pointer px-2.5 py-1.5 rounded-lg transition-all ${
+      checked
+        ? "bg-[var(--color-primary)]/10"
+        : "hover:bg-[var(--color-surface-hover)]"
+    }`}
+  >
+    <span
+      className={`flex-shrink-0 w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${
+        checked
+          ? "border-[var(--color-primary)] bg-[var(--color-primary)]"
+          : "border-[var(--color-border)]"
+      }`}
+    >
+      {checked && (
+        <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+      )}
+    </span>
+    <span
+      className={`text-[13px] leading-tight transition-colors ${
+        checked
+          ? "text-[var(--color-primary)] font-medium"
+          : "text-[var(--color-text-secondary)]"
+      }`}
+    >
       {label}
     </span>
   </label>
