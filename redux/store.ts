@@ -1,4 +1,3 @@
-// store.ts
 import { configureStore, Middleware } from "@reduxjs/toolkit";
 import cartReducer from "./cartSlice";
 import favoritesReducer from "./favoritesSlice";
@@ -17,6 +16,14 @@ const localStorageMiddleware: Middleware = (store) => (next) => (action) => {
   if (actionType?.startsWith("favorites/")) {
     const favoritesState = store.getState().favorites;
     localStorage.setItem("favoriteItems", JSON.stringify(favoritesState.ids));
+  }
+  if (actionType === "trailers/fetchTrailers/fulfilled") {
+    const trailersList = store.getState().trailers.list;
+    localStorage.setItem("cachedTrailers", JSON.stringify(trailersList));
+  }
+  if (actionType === "components/fetchComponents/fulfilled") {
+    const componentsList = store.getState().components.list;
+    localStorage.setItem("cachedComponents", JSON.stringify(componentsList));
   }
 
   return result;

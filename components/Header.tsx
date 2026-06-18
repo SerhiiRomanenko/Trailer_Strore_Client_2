@@ -4,12 +4,12 @@ import {
   ShoppingCart,
   Star,
   Menu,
+  X,
   User,
   ChevronDown,
   Sun,
   Moon,
   Phone,
-  MapPin,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";

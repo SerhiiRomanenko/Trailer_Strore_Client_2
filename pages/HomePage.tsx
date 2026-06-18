@@ -2,11 +2,12 @@ import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Product } from "../types";
 import ProductList from "../components/TrailerList";
+import SkeletonCard from "../components/SkeletonCard";
 import { addToCart } from "../redux/cartSlice";
 import { toggleFavorite } from "../redux/favoritesSlice";
 import { RootState, AppDispatch } from "../redux/store";
 import Filters from "../components/Filters";
-import { Filter, X, SlidersHorizontal } from "lucide-react";
+import { X, SlidersHorizontal, ChevronUp, ChevronDown } from "lucide-react";
 import { fetchTrailers } from "../redux/trailerSlice";
 import { fetchComponents } from "../redux/componentSlice";
 import { useToast } from "../components/Toast";
@@ -143,6 +144,14 @@ const HomePage: React.FC = () => {
     filters.inStockOnly ||
     filters.suspensionTypes.length > 0;
 
+  const activeFilterCount =
+    filters.brands.length +
+    filters.suspensionTypes.length +
+    (filters.inStockOnly ? 1 : 0) +
+    (filters.minPrice ? 1 : 0) +
+    (filters.maxPrice ? 1 : 0) +
+    (filters.searchQuery ? 1 : 0);
+
   return (
     <div className="py-4 md:py-6">
       {/* Title */}
@@ -158,7 +167,7 @@ const HomePage: React.FC = () => {
       <div className="flex gap-4">
         {/* Desktop sidebar */}
         <aside className="hidden lg:block w-56 flex-shrink-0">
-          <div className="sticky top-[60px]">
+          <div className="sticky top-16">
             <Filters
               filters={filters}
               onFilterChange={handleFilterChange}
@@ -169,69 +178,109 @@ const HomePage: React.FC = () => {
           </div>
         </aside>
 
-        {/* Mobile filter button */}
-        <div className="lg:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-40">
-          <button
-            onClick={() => setIsFiltersOpen(true)}
-            className="flex items-center gap-2 bg-[var(--color-accent)] text-white px-4 py-2.5 rounded-full shadow-[var(--shadow-md)] text-[13px] font-semibold"
-          >
-            <SlidersHorizontal className="h-3.5 w-3.5" />
-            Фільтри
-            {hasFilters && (
-              <span className="flex items-center justify-center h-4 w-4 bg-white/30 rounded-full text-[10px]">
-                {!filters.brands.length === 0 && !filters.suspensionTypes.length === 0 && !filters.inStockOnly && !filters.minPrice && !filters.maxPrice ? "" : (
-                  filters.brands.length +
-                  (filters.suspensionTypes.length > 0 ? 1 : 0) +
-                  (filters.inStockOnly ? 1 : 0) +
-                  (filters.minPrice ? 1 : 0) +
-                  (filters.maxPrice ? 1 : 0)
-                )}
-              </span>
-            )}
-          </button>
-        </div>
-
-        {/* Mobile filter overlay */}
-        <div
-          className={`fixed inset-0 bg-black/40 z-50 lg:hidden transition-opacity ${
-            isFiltersOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-          }`}
-          onClick={() => setIsFiltersOpen(false)}
-        >
-          <div
-            className={`fixed top-0 left-0 h-full w-full max-w-xs bg-[var(--color-surface)] shadow-xl transition-transform duration-300 ${
-              isFiltersOpen ? "translate-x-0" : "-translate-x-full"
-            }`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-3 border-b border-[var(--color-border)] flex items-center justify-between">
-              <h2 className="text-sm font-semibold">Фільтри</h2>
-              <button onClick={() => setIsFiltersOpen(false)}>
-                <X className="h-5 w-5" />
+        {/* Mobile filter chips */}
+        <div className="lg:hidden mb-3">
+          <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+            <button
+              onClick={() => setIsFiltersOpen(true)}
+              className={`flex items-center gap-1.5 flex-shrink-0 px-3.5 py-2 rounded-full text-[13px] font-medium border transition-colors ${
+                hasFilters
+                  ? "bg-[var(--color-primary)] border-[var(--color-primary)] text-white"
+                  : "bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text)] hover:border-[var(--color-primary)]"
+              }`}
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5" />
+              Фільтри
+              {hasFilters && (
+                <span className="flex items-center justify-center h-4 w-4 bg-white/30 rounded-full text-[10px] font-bold">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+            {filters.inStockOnly && (
+              <button
+                onClick={() => handleFilterChange("inStockOnly", false)}
+                className="flex items-center gap-1 flex-shrink-0 px-3 py-2 rounded-full text-[13px] bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/30"
+              >
+                В наявності <X className="h-3 w-3" />
               </button>
-            </div>
-            <div className="p-3 h-[calc(100vh-48px)] overflow-y-auto">
-              <Filters
-                filters={filters}
-                onFilterChange={handleFilterChange}
-                onResetFilters={handleResetFilters}
-                allBrands={allBrands}
-                allSuspensionTypes={allSuspensionTypes}
-              />
-            </div>
+            )}
           </div>
         </div>
 
+        {/* Mobile bottom sheet filter */}
+        {isFiltersOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden">
+            {/* Backdrop */}
+            <div
+              className="absolute inset-0 bg-black/50 animate-fade-in"
+              onClick={() => setIsFiltersOpen(false)}
+            />
+            {/* Sheet */}
+            <div className="absolute bottom-0 left-0 right-0 bg-[var(--color-surface)] rounded-t-2xl max-h-[85vh] flex flex-col animate-slide-up">
+              {/* Handle */}
+              <div className="flex items-center justify-center py-3 border-b border-[var(--color-border)]">
+                <div className="w-8 h-1 bg-[var(--color-border)] rounded-full" />
+              </div>
+              {/* Header */}
+              <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)]">
+                <h2 className="text-sm font-semibold text-[var(--color-text)]">Фільтри</h2>
+                <button
+                  onClick={() => setIsFiltersOpen(false)}
+                  className="p-1 rounded-lg hover:bg-[var(--color-surface-hover)]"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              {/* Filters */}
+              <div className="flex-1 overflow-y-auto px-4 py-3">
+                <Filters
+                  filters={filters}
+                  onFilterChange={handleFilterChange}
+                  onResetFilters={handleResetFilters}
+                  allBrands={allBrands}
+                  allSuspensionTypes={allSuspensionTypes}
+                />
+              </div>
+              {/* Apply button */}
+              <div className="px-4 py-3 border-t border-[var(--color-border)]">
+                <button
+                  onClick={() => setIsFiltersOpen(false)}
+                  className="w-full py-2.5 rounded-lg bg-[var(--color-primary)] text-white text-sm font-semibold hover:bg-[var(--color-primary-hover)] transition-colors"
+                >
+                  {hasFilters ? `Показати ${filteredProducts.length}` : "Застосувати"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Products */}
         <div className="flex-1 min-w-0">
-          {filteredProducts.length > 0 ? (
+          {trailersStatus === "loading" && trailers.length === 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+              {Array.from({ length: 12 }).map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </div>
+          ) : trailersStatus === "failed" && trailers.length === 0 ? (
+            <div className="text-center py-16 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]">
+              <p className="text-sm text-[var(--color-error)]">Помилка: {trailersError}</p>
+              <button
+                onClick={() => dispatch(fetchTrailers())}
+                className="mt-3 text-sm font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-hover)]"
+              >
+                Спробувати знову
+              </button>
+            </div>
+          ) : filteredProducts.length > 0 ? (
             <ProductList
               products={filteredProducts}
               onAddToCart={handleAddToCart}
               onToggleFavorite={handleToggleFavorite}
               favoriteIds={favoriteIds}
             />
-          ) : trailersStatus !== "loading" && trailersStatus !== "failed" ? (
+          ) : (
             <div className="text-center py-16 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]">
               <p className="text-sm text-[var(--color-text-tertiary)]">Нічого не знайдено</p>
               {hasFilters && (
@@ -243,7 +292,7 @@ const HomePage: React.FC = () => {
                 </button>
               )}
             </div>
-          ) : null}
+          )}
         </div>
       </div>
     </div>

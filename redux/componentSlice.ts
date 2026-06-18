@@ -1,18 +1,31 @@
-// src/redux/componentSlice.ts
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import { Product } from "../types";
+
+const API_BASE_URL = import.meta.env.VITE_BASE_API_URL || "https://trailer-strore-server.onrender.com";
+
+function loadCachedComponents(): Product[] {
+  try {
+    const cached = localStorage.getItem("cachedComponents");
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      return Array.isArray(parsed) ? parsed : [];
+    }
+  } catch { /* ignore */ }
+  return [];
+}
 
 interface ComponentsState {
   list: Product[];
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
 }
-const API_BASE_URL = import.meta.env.VITE_BASE_API_URL || "https://trailer-strore-server.onrender.com";
+
+const cachedComponents = loadCachedComponents();
 
 const initialState: ComponentsState = {
-  list: [],
-  status: "idle",
+  list: cachedComponents,
+  status: cachedComponents.length > 0 ? "succeeded" : "idle",
   error: null,
 };
 
@@ -135,22 +148,21 @@ const componentSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchComponents.pending, (state) => {
-        state.status = "loading";
-      })
       .addCase(fetchComponents.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.list = Array.isArray(action.payload) ? action.payload : [];
       })
       .addCase(fetchComponents.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.payload || "Failed to fetch components";
+        // Don't change status if we have cached data
+        if (state.list.length === 0) {
+          state.status = "failed";
+          state.error = action.payload || "Failed to fetch components";
+        }
       })
       .addCase(addComponent.fulfilled, (state, action) => {
         state.list.push(action.payload);
       })
       .addCase(addComponent.rejected, (state, action) => {
-        state.status = "failed";
         state.error = action.payload || "Failed to add component";
       })
       .addCase(updateComponent.fulfilled, (state, action) => {
@@ -160,14 +172,12 @@ const componentSlice = createSlice({
         }
       })
       .addCase(updateComponent.rejected, (state, action) => {
-        state.status = "failed";
         state.error = action.payload || "Failed to update component";
       })
       .addCase(deleteComponent.fulfilled, (state, action) => {
         state.list = state.list.filter((p) => p.id !== action.payload);
       })
       .addCase(deleteComponent.rejected, (state, action) => {
-        state.status = "failed";
         state.error = action.payload || "Failed to delete component";
       })
       .addCase(fetchComponentById.fulfilled, (state, action) => {
@@ -182,7 +192,6 @@ const componentSlice = createSlice({
         state.status = "succeeded";
       })
       .addCase(fetchComponentById.rejected, (state, action) => {
-        state.status = "failed";
         state.error = action.payload || "Failed to fetch component by ID";
       });
   },

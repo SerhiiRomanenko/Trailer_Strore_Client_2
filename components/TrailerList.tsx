@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { fetchTrailers } from "../redux/trailerSlice";
 import { RootState, AppDispatch } from "../redux/store";
 import ProductCard from "./ProductCard";
+import SkeletonCard from "./SkeletonCard";
 import { Product } from "../types";
 
 interface TrailerListProps {
@@ -11,19 +12,6 @@ interface TrailerListProps {
   onToggleFavorite: (productId: string) => void;
   favoriteIds: Set<string>;
 }
-
-const SkeletonCard = () => (
-  <div className="bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] overflow-hidden">
-    <div className="skeleton" style={{ aspectRatio: "1" }} />
-    <div className="p-2.5 space-y-2">
-      <div className="skeleton h-2.5 w-16" />
-      <div className="skeleton h-3 w-full" />
-      <div className="skeleton h-3 w-2/3" />
-      <div className="skeleton h-5 w-20" />
-      <div className="skeleton h-8 w-full rounded-md" />
-    </div>
-  </div>
-);
 
 const TrailerList: React.FC<TrailerListProps> = ({
   products,

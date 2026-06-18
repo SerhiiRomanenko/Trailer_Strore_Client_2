@@ -50,7 +50,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   const isOutOfStock = !product.inStock;
 
   return (
-    <div className="group bg-[var(--color-surface)] rounded-md border border-[var(--color-border)] overflow-hidden transition-all duration-200 hover:shadow-[var(--shadow-md)] hover:border-[var(--color-border-hover)]">
+    <div className="group bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] overflow-hidden transition-all duration-200 hover:shadow-[var(--shadow-md)] hover:border-[var(--color-border-hover)] hover:-translate-y-0.5">
       {/* Image */}
       <div className="relative overflow-hidden bg-[var(--color-bg)]">
         <a href={detailPath} onClick={handleNav} className="block">
@@ -82,13 +82,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
           />
         </button>
 
-        {/* Out of stock overlay */}
+        {/* Out of stock badge */}
         {isOutOfStock && (
-          <div className="absolute inset-0 bg-black/25 flex items-center justify-center">
-            <span className="text-xs font-medium text-white bg-black/50 px-3 py-1.5 rounded backdrop-blur-sm">
-              Немає в наявності
-            </span>
-          </div>
+          <span className="absolute top-2 left-2 text-[10px] font-semibold text-white bg-black/60 px-2 py-0.5 rounded-md backdrop-blur-sm">
+            Немає
+          </span>
         )}
       </div>
 
@@ -120,7 +118,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           </span>
         </div>
 
-        {/* Add to cart button (Rozetka style - orange) */}
+        {/* Add to cart button */}
         <button
           type="button"
           onClick={handleAddToCart}

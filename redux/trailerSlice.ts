@@ -1,9 +1,19 @@
-// src/redux/trailerSlice.ts
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 import { Product } from "../types";
 
 const API_BASE_URL = import.meta.env.VITE_BASE_API_URL || "https://trailer-strore-server.onrender.com";
+
+function loadCachedTrailers(): Product[] {
+  try {
+    const cached = localStorage.getItem("cachedTrailers");
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      return Array.isArray(parsed) ? parsed : [];
+    }
+  } catch { /* ignore */ }
+  return [];
+}
 
 interface TrailersState {
   list: Product[];
@@ -12,10 +22,12 @@ interface TrailersState {
   error: string | null;
 }
 
+const cachedTrailers = loadCachedTrailers();
+
 const initialState: TrailersState = {
-  list: [],
+  list: cachedTrailers,
   currentProduct: null,
-  status: "idle",
+  status: cachedTrailers.length > 0 ? "succeeded" : "idle",
   error: null,
 };
 
@@ -151,46 +163,30 @@ const trailerSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchTrailers.pending, (state) => {
-        state.status = "loading";
-      })
       .addCase(fetchTrailers.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.list = Array.isArray(action.payload) ? action.payload : [];
       })
       .addCase(fetchTrailers.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.payload || "Failed to fetch trailers";
-      })
-      .addCase(fetchTrailerById.pending, (state) => {
-        state.status = "loading";
-        state.currentProduct = null;
-      })
-      .addCase(
-        fetchTrailerById.fulfilled,
-        (state, action: PayloadAction<Product>) => {
-          state.status = "succeeded";
-          state.currentProduct = action.payload;
+        // Don't change status if we have cached data
+        if (state.list.length === 0) {
+          state.status = "failed";
+          state.error = action.payload || "Failed to fetch trailers";
         }
-      )
+      })
+      .addCase(fetchTrailerById.fulfilled, (state, action: PayloadAction<Product>) => {
+        state.status = "succeeded";
+        state.currentProduct = action.payload;
+      })
       .addCase(fetchTrailerById.rejected, (state, action) => {
-        state.status = "failed";
         state.error = action.payload || "Failed to fetch product by ID";
         state.currentProduct = null;
       })
-      .addCase(fetchTrailerBySlug.pending, (state) => {
-        state.status = "loading";
-        state.currentProduct = null;
+      .addCase(fetchTrailerBySlug.fulfilled, (state, action: PayloadAction<Product>) => {
+        state.status = "succeeded";
+        state.currentProduct = action.payload;
       })
-      .addCase(
-        fetchTrailerBySlug.fulfilled,
-        (state, action: PayloadAction<Product>) => {
-          state.status = "succeeded";
-          state.currentProduct = action.payload;
-        }
-      )
       .addCase(fetchTrailerBySlug.rejected, (state, action) => {
-        state.status = "failed";
         state.error = action.payload || "Failed to fetch product details";
         state.currentProduct = null;
       })
