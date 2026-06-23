@@ -10,6 +10,7 @@ import {
   Sun,
   Moon,
   Phone,
+  SlidersHorizontal,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
@@ -18,9 +19,12 @@ import logo from "../components/icons/logo.png";
 
 interface HeaderProps {
   route: string;
+  showFilter?: boolean;
+  onOpenFilters?: () => void;
+  activeFilterCount?: number;
 }
 
-const Header: React.FC<HeaderProps> = ({ route }) => {
+const Header: React.FC<HeaderProps> = ({ route, showFilter, onOpenFilters, activeFilterCount = 0 }) => {
   const { currentUser, logout, loading } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -75,7 +79,7 @@ const Header: React.FC<HeaderProps> = ({ route }) => {
             className="md:hidden p-2 -ml-1 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] transition-colors"
           >
             {mobileMenuOpen ? (
-              <Menu className="h-5 w-5" />
+              <X className="h-5 w-5" />
             ) : (
               <Menu className="h-5 w-5" />
             )}
@@ -109,6 +113,21 @@ const Header: React.FC<HeaderProps> = ({ route }) => {
               <Phone className="h-3.5 w-3.5" />
               +38 (067) 937-27-31
             </a>
+
+            {/* Mobile filter button */}
+            {showFilter && (
+              <button
+                onClick={onOpenFilters}
+                className={`md:hidden p-2 rounded-lg transition-colors ${
+                  activeFilterCount > 0
+                    ? "text-[var(--color-primary)] bg-[var(--color-primary)]/10"
+                    : "text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)]"
+                }`}
+              >
+                <SlidersHorizontal className="h-[18px] w-[18px]" />
+                {activeFilterCount > 0 && <Badge count={activeFilterCount} />}
+              </button>
+            )}
 
             {/* Theme toggle */}
             <button

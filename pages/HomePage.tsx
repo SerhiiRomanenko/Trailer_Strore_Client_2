@@ -11,6 +11,7 @@ import { X, SlidersHorizontal, ChevronUp, ChevronDown } from "lucide-react";
 import { fetchTrailers } from "../redux/trailerSlice";
 import { fetchComponents } from "../redux/componentSlice";
 import { useToast } from "../components/Toast";
+import { useFilterUI } from "../contexts/FilterContext";
 
 export interface FiltersState {
   searchQuery: string;
@@ -24,6 +25,7 @@ export interface FiltersState {
 const HomePage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { success, info } = useToast();
+  const { setShowFilter, setOpenCallback, setActiveFilterCount } = useFilterUI();
 
   const favoriteIdsArray = useSelector(
     (state: RootState): string[] => state.favorites.ids
@@ -44,6 +46,18 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     document.title = "Причепи | ПричепМаркет";
   }, []);
+
+  // Register filter state with global context for Header
+  useEffect(() => {
+    setShowFilter(true);
+    setOpenCallback(() => setIsFiltersOpen(true));
+    setActiveFilterCount(activeFilterCount);
+    return () => {
+      setShowFilter(false);
+      setOpenCallback(null);
+      setActiveFilterCount(0);
+    };
+  }, [setShowFilter, setOpenCallback, setActiveFilterCount]);
 
   useEffect(() => {
     if (trailersStatus === "idle") dispatch(fetchTrailers());

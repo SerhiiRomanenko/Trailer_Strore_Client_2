@@ -24,9 +24,11 @@ import { fetchTrailers } from "./redux/trailerSlice";
 import { fetchComponents } from "./redux/componentSlice";
 import { ToastProvider } from "./components/Toast";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { FilterUIProvider, useFilterUI } from "./contexts/FilterContext";
 
 const AppContent: React.FC = () => {
   const { currentUser } = useAuth();
+  const { showFilter, onOpenFilters, activeFilterCount } = useFilterUI();
   const [route, setRoute] = useState(window.location.pathname);
   const dispatch = useDispatch<AppDispatch>();
 
@@ -112,7 +114,7 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-[var(--color-bg)]">
-      {!isAdminPage && <Header route={route} />}
+      {!isAdminPage && <Header route={route} showFilter={showFilter} onOpenFilters={onOpenFilters || undefined} activeFilterCount={activeFilterCount} />}
       <main
         className={`flex-grow ${
           !isAdminPage ? "container mx-auto px-4 md:px-6" : ""
@@ -128,9 +130,11 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => (
   <ThemeProvider>
     <AuthProvider>
-      <ToastProvider>
-        <AppContent />
-      </ToastProvider>
+      <FilterUIProvider>
+        <ToastProvider>
+          <AppContent />
+        </ToastProvider>
+      </FilterUIProvider>
     </AuthProvider>
   </ThemeProvider>
 );
