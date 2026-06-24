@@ -91,7 +91,7 @@ const Header: React.FC<HeaderProps> = ({ route, showFilter, onOpenFilters, activ
             onClick={(e) => handleNav(e, "/")}
             className="flex items-center flex-shrink-0 cursor-pointer"
           >
-            <img src={logo} alt="ПричепМаркет" className="h-9 md:h-11 object-contain" />
+            <img src={logo} alt="ПричіпМаркет" className="h-9 md:h-11 object-contain" />
           </a>
 
           {/* Desktop nav */}

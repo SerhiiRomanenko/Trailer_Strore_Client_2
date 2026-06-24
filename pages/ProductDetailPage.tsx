@@ -255,9 +255,9 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) => {
             </div>
 
             {/* Features */}
-            <div className="grid grid-cols-3 gap-3 pt-4 border-t border-[var(--color-border)]">
+            <div className="grid grid-cols-2 gap-3 pt-4 border-t border-[var(--color-border)]">
               {[
-                { icon: <Truck className="h-4 w-4" />, text: "Доставка" },
+                // { icon: <Truck className="h-4 w-4" />, text: "Доставка" },
                 { icon: <Shield className="h-4 w-4" />, text: "Гарантія" },
                 { icon: <Package className="h-4 w-4" />, text: "В наявності" },
               ].map((item, i) => (

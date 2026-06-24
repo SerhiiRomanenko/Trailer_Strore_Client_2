@@ -21,7 +21,7 @@ const Footer: React.FC = () => {
                 Надійний партнер у виборі легкових причепів. Широкий асортимент від перевірених виробників.
               </p>
               {/* Social links */}
-              <div className="flex items-center gap-2 mt-4">
+              {/* <div className="flex items-center gap-2 mt-4">
                 <a
                   href="#"
                   className="p-2 rounded-md bg-white/10 text-white/60 hover:text-white hover:bg-white/15 transition-colors"
@@ -34,7 +34,7 @@ const Footer: React.FC = () => {
                 >
                   <Instagram className="h-3.5 w-3.5" />
                 </a>
-              </div>
+              </div> */}
             </div>
 
             {/* Catalog */}
@@ -129,7 +129,7 @@ const Footer: React.FC = () => {
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2 py-4">
             <p className="text-[11px] text-white/40">
-              &copy; {new Date().getFullYear()} ПричепМаркет. Всі права захищено.
+              &copy; {new Date().getFullYear()} ПричіпМаркет. Всі права захищено.
             </p>
             <div className="flex items-center gap-4">
               <a href="/contacts" onClick={(e) => handleNav(e, "/contacts")} className="text-[11px] text-white/40 hover:text-white/70 transition-colors cursor-pointer">
