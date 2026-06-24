@@ -103,7 +103,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <a
           href={detailPath}
           onClick={handleNav}
-          className="block text-[13px] text-[var(--color-link)] hover:text-[var(--color-link-hover)] leading-snug line-clamp-2 mb-2 transition-colors min-h-[2.5rem]"
+          className="block text-[13px] text-[var(--color-link)] hover:text-[var(--color-link-hover)] leading-snug line-clamp-2 mb-2 transition-colors break-words min-h-[2.5rem]"
         >
           {product.name}
         </a>

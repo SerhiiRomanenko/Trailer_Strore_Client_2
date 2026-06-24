@@ -7,7 +7,7 @@ import { addToCart } from "../redux/cartSlice";
 import { toggleFavorite } from "../redux/favoritesSlice";
 import { RootState, AppDispatch } from "../redux/store";
 import Filters from "../components/Filters";
-import { X, SlidersHorizontal, ChevronUp, ChevronDown } from "lucide-react";
+import { SlidersHorizontal } from "lucide-react";
 import { fetchTrailers } from "../redux/trailerSlice";
 import { fetchComponents } from "../redux/componentSlice";
 import { useToast } from "../components/Toast";
@@ -178,9 +178,47 @@ const HomePage: React.FC = () => {
         </p>
       </div>
 
-      <div className="flex gap-4">
-        {/* Desktop sidebar */}
-        <aside className="hidden lg:block w-56 flex-shrink-0">
+      {/* Layout: column on mobile, row on desktop */}
+      <div className="flex flex-col md:flex-row gap-4">
+        {/* Mobile: inline collapsible filters — 100% width, first in DOM */}
+        <div className="md:hidden">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+              className="flex items-center gap-2 text-sm font-semibold text-[var(--color-text)]"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              Фільтри
+              {hasFilters && (
+                <span className="flex items-center justify-center h-5 w-5 bg-[var(--color-accent)] text-white rounded-full text-[10px]">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+            {hasFilters && (
+              <button
+                onClick={handleResetFilters}
+                className="text-xs font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-hover)]"
+              >
+                Скинути
+              </button>
+            )}
+          </div>
+          <div className={`overflow-hidden transition-all duration-300 ${isFiltersOpen ? "max-h-[800px] mt-2" : "max-h-0"}`}>
+            <div className="bg-[var(--color-surface)] rounded-md border border-[var(--color-border)] p-3">
+              <Filters
+                filters={filters}
+                onFilterChange={handleFilterChange}
+                onResetFilters={handleResetFilters}
+                allBrands={allBrands}
+                allSuspensionTypes={allSuspensionTypes}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop sidebar — hidden on mobile */}
+        <aside className="hidden md:block md:w-56 md:flex-shrink-0">
           <div className="sticky top-16">
             <Filters
               filters={filters}
@@ -192,100 +230,13 @@ const HomePage: React.FC = () => {
           </div>
         </aside>
 
-        {/* Mobile filter chips */}
-        <div className="lg:hidden mb-3">
-          <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
-            <button
-              onClick={() => setIsFiltersOpen(true)}
-              className={`flex items-center gap-1.5 flex-shrink-0 px-3.5 py-2 rounded-full text-[13px] font-medium border transition-colors ${
-                hasFilters
-                  ? "bg-[var(--color-primary)] border-[var(--color-primary)] text-white"
-                  : "bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text)] hover:border-[var(--color-primary)]"
-              }`}
-            >
-              <SlidersHorizontal className="h-3.5 w-3.5" />
-              Фільтри
-              {hasFilters && (
-                <span className="flex items-center justify-center h-4 w-4 bg-white/30 rounded-full text-[10px] font-bold">
-                  {activeFilterCount}
-                </span>
-              )}
-            </button>
-            {filters.inStockOnly && (
-              <button
-                onClick={() => handleFilterChange("inStockOnly", false)}
-                className="flex items-center gap-1 flex-shrink-0 px-3 py-2 rounded-full text-[13px] bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/30"
-              >
-                В наявності <X className="h-3 w-3" />
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Mobile bottom sheet filter */}
-        {isFiltersOpen && (
-          <div className="fixed inset-0 z-50 lg:hidden">
-            {/* Backdrop */}
-            <div
-              className="absolute inset-0 bg-black/50 animate-fade-in"
-              onClick={() => setIsFiltersOpen(false)}
-            />
-            {/* Sheet */}
-            <div className="absolute bottom-0 left-0 right-0 bg-[var(--color-surface)] rounded-t-2xl max-h-[85vh] flex flex-col animate-slide-up">
-              {/* Handle */}
-              <div className="flex items-center justify-center py-3 border-b border-[var(--color-border)]">
-                <div className="w-8 h-1 bg-[var(--color-border)] rounded-full" />
-              </div>
-              {/* Header */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)]">
-                <h2 className="text-sm font-semibold text-[var(--color-text)]">Фільтри</h2>
-                <button
-                  onClick={() => setIsFiltersOpen(false)}
-                  className="p-1 rounded-lg hover:bg-[var(--color-surface-hover)]"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-              {/* Filters */}
-              <div className="flex-1 overflow-y-auto px-4 py-3">
-                <Filters
-                  filters={filters}
-                  onFilterChange={handleFilterChange}
-                  onResetFilters={handleResetFilters}
-                  allBrands={allBrands}
-                  allSuspensionTypes={allSuspensionTypes}
-                />
-              </div>
-              {/* Apply button */}
-              <div className="px-4 py-3 border-t border-[var(--color-border)]">
-                <button
-                  onClick={() => setIsFiltersOpen(false)}
-                  className="w-full py-2.5 rounded-lg bg-[var(--color-primary)] text-white text-sm font-semibold hover:bg-[var(--color-primary-hover)] transition-colors"
-                >
-                  {hasFilters ? `Показати ${filteredProducts.length}` : "Застосувати"}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Products */}
+        {/* Products — second in DOM, full width on mobile */}
         <div className="flex-1 min-w-0">
-          {trailersStatus === "loading" && trailers.length === 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+          {trailersStatus === "loading" && !filteredProducts.length ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-3">
               {Array.from({ length: 12 }).map((_, i) => (
                 <SkeletonCard key={i} />
               ))}
-            </div>
-          ) : trailersStatus === "failed" && trailers.length === 0 ? (
-            <div className="text-center py-16 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]">
-              <p className="text-sm text-[var(--color-error)]">Помилка: {trailersError}</p>
-              <button
-                onClick={() => dispatch(fetchTrailers())}
-                className="mt-3 text-sm font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-hover)]"
-              >
-                Спробувати знову
-              </button>
             </div>
           ) : filteredProducts.length > 0 ? (
             <ProductList
@@ -294,10 +245,20 @@ const HomePage: React.FC = () => {
               onToggleFavorite={handleToggleFavorite}
               favoriteIds={favoriteIds}
             />
-          ) : (
+          ) : trailersStatus === "loading" ? null : (
             <div className="text-center py-16 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]">
-              <p className="text-sm text-[var(--color-text-tertiary)]">Нічого не знайдено</p>
-              {hasFilters && (
+              <p className="text-sm text-[var(--color-text-tertiary)]">
+                {trailersStatus === "failed" ? `Помилка: ${trailersError}` : "Нічого не знайдено"}
+              </p>
+              {trailersStatus === "failed" && (
+                <button
+                  onClick={() => dispatch(fetchTrailers())}
+                  className="mt-3 text-sm font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-hover)]"
+                >
+                  Спробувати знову
+                </button>
+              )}
+              {trailersStatus !== "failed" && hasFilters && (
                 <button
                   onClick={handleResetFilters}
                   className="mt-3 text-sm font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-hover)]"

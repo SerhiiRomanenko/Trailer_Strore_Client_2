@@ -41,7 +41,6 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) => {
   );
 
   const [activeImage, setActiveImage] = useState(0);
-  const [activeTab, setActiveTab] = useState<"description" | "specifications">("description");
 
   const navigate = useCallback((path: string) => {
     window.history.pushState({}, "", path);
@@ -273,49 +272,29 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) => {
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="border-t border-[var(--color-border)]">
-          <div className="flex">
-            {(["description", "specifications"] as const).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`flex-1 py-3 text-sm font-medium transition-colors border-b-2 ${
-                  activeTab === tab
-                    ? "border-[var(--color-primary)] text-[var(--color-primary)]"
-                    : "border-transparent text-[var(--color-text-tertiary)] hover:text-[var(--color-text)]"
-                }`}
-              >
-                {tab === "description" ? "Опис" : "Характеристики"}
-              </button>
-            ))}
+        {/* Specifications */}
+        {product.specifications && product.specifications.length > 0 && (
+          <div className="border-t border-[var(--color-border)] p-4 md:p-6">
+            <h2 className="text-sm font-semibold text-[var(--color-text)] mb-3">Характеристики</h2>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <tbody>
+                  {product.specifications.map((spec, i) => (
+                    <tr key={i} className="border-b border-[var(--color-border)] last:border-b-0">
+                      <td className="py-2.5 pr-4 text-[var(--color-text-tertiary)] w-1/3 font-medium">
+                        {spec.name}
+                      </td>
+                      <td className="py-2.5 text-[var(--color-text)] font-medium">
+                        {spec.value}
+                        {spec.unit ? ` ${spec.unit}` : ""}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-          <div className="p-4 md:p-6">
-            {activeTab === "description" ? (
-              <div className="text-sm text-[var(--color-text-secondary)] leading-relaxed whitespace-pre-wrap">
-                {product.description}
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <tbody>
-                    {product.specifications.map((spec, i) => (
-                      <tr key={i} className="border-b border-[var(--color-border)] last:border-b-0">
-                        <td className="py-2.5 pr-4 text-[var(--color-text-tertiary)] w-1/3 font-medium">
-                          {spec.name}
-                        </td>
-                        <td className="py-2.5 text-[var(--color-text)] font-medium">
-                          {spec.value}
-                          {spec.unit ? ` ${spec.unit}` : ""}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
