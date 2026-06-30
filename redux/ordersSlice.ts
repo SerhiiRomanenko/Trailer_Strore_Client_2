@@ -43,10 +43,19 @@ interface OrdersState {
   error: string | null;
 }
 
+const cachedOrders = (() => {
+  try {
+    const cached = localStorage.getItem("cachedOrders");
+    return cached ? JSON.parse(cached) : [];
+  } catch {
+    return [];
+  }
+})();
+
 const initialState: OrdersState = {
-  list: [],
+  list: cachedOrders,
   currentOrder: null,
-  status: "idle",
+  status: cachedOrders.length > 0 ? "succeeded" : "idle",
   error: null,
 };
 
@@ -57,12 +66,20 @@ export const fetchAllOrders = createAsyncThunk<
 >("orders/fetchAllOrders", async (_, { rejectWithValue }) => {
   try {
     const token = localStorage.getItem("authToken");
-    const response = await axios.get(`${API_BASE_URL}/api/orders`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
+    const maxRetries = 2;
+    for (let i = 0; i <= maxRetries; i++) {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/api/orders`, {
+          headers: { Authorization: `Bearer ${token}` },
+          timeout: 30000,
+        });
+        return response.data;
+      } catch (error: any) {
+        if (i === maxRetries) throw error;
+        await new Promise((r) => setTimeout(r, 1000 * Math.pow(2, i)));
+      }
+    }
+    return [];
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.message || error.message);
   }
@@ -237,7 +254,12 @@ const ordersSlice = createSlice({
       .addCase(updateOrderStatus.fulfilled, (state, action) => {
         const index = state.list.findIndex((o) => o.id === action.payload.id);
         if (index !== -1) {
-          state.list[index] = action.payload;
+          // Preserve original items and details, only update status
+          state.list[index] = {
+            ...state.list[index],
+            status: action.payload.status,
+            updatedAt: action.payload.updatedAt,
+          };
         }
         state.status = "succeeded";
       })

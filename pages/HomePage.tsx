@@ -9,7 +9,6 @@ import { RootState, AppDispatch } from "../redux/store";
 import Filters from "../components/Filters";
 import { SlidersHorizontal } from "lucide-react";
 import { fetchTrailers } from "../redux/trailerSlice";
-import { fetchComponents } from "../redux/componentSlice";
 import { useToast } from "../components/Toast";
 import { useFilterUI } from "../contexts/FilterContext";
 
@@ -41,8 +40,6 @@ const HomePage: React.FC = () => {
     error: trailersError,
   } = useSelector((state: RootState) => state.trailers);
 
-  const { status: componentsStatus } = useSelector((state: RootState) => state.components);
-
   useEffect(() => {
     document.title = "Причепи | ПричепМаркет";
   }, []);
@@ -60,8 +57,7 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     if (trailersStatus === "idle") dispatch(fetchTrailers());
-    if (componentsStatus === "idle") dispatch(fetchComponents());
-  }, [trailersStatus, componentsStatus, dispatch]);
+  }, [trailersStatus, dispatch]);
 
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [filters, setFilters] = useState<FiltersState>({

@@ -128,68 +128,11 @@ const AdminOrders: React.FC = () => {
     "Cancelled",
   ];
 
-  const openOrderDetailsModal = async (orderId: string) => {
-    setModalLoading(true);
-    setModalError(null);
-    setSelectedOrderForModal(null);
-    setShowDetailsModal(true);
-
-    const token = localStorage.getItem("authToken");
-
-    if (!token) {
-      setModalError(
-        "Токен авторизації відсутній. Будь ласка, увійдіть як адміністратор."
-      );
-      setModalLoading(false);
-      return;
-    }
-
-    try {
-      console.log(`Fetching details for order ID: ${orderId}`);
-      // Implement exponential backoff for API calls
-      const MAX_RETRIES = 3;
-      let retries = 0;
-      let response;
-      while (retries < MAX_RETRIES) {
-        try {
-          response = await fetch(`${API_BASE_URL}/api/orders/${orderId}`, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          if (response.ok) break; // Exit loop if successful
-        } catch (fetchError) {
-          console.error(`Attempt ${retries + 1} failed:`, fetchError);
-        }
-        retries++;
-        if (retries < MAX_RETRIES) {
-          await new Promise((res) =>
-            setTimeout(res, Math.pow(2, retries) * 100)
-          ); // Exponential backoff
-        }
-      }
-
-      if (!response || !response.ok) {
-        const errorData = response
-          ? await response.json()
-          : { message: "Network error or API unavailable" };
-        throw new Error(
-          errorData.message || `Помилка HTTP: ${response?.status || "Unknown"}`
-        );
-      }
-
-      const data = await response.json();
-      setSelectedOrderForModal(data);
-      console.log("Order details fetched for modal:", data);
-    } catch (error: any) {
-      setModalError(
-        `Помилка завантаження деталей замовлення: ${error.message}`
-      );
-      console.error("Failed to fetch order details for modal:", error);
-    } finally {
-      setModalLoading(false);
+  const openOrderDetailsModal = (orderId: string) => {
+    const order = orders.find((o) => o.id === orderId);
+    if (order) {
+      setSelectedOrderForModal(order);
+      setShowDetailsModal(true);
     }
   };
 

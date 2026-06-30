@@ -25,6 +25,10 @@ const localStorageMiddleware: Middleware = (store) => (next) => (action) => {
     const componentsList = store.getState().components.list;
     localStorage.setItem("cachedComponents", JSON.stringify(componentsList));
   }
+  if (actionType === "orders/fetchAllOrders/fulfilled") {
+    const ordersList = store.getState().orders.list;
+    localStorage.setItem("cachedOrders", JSON.stringify(ordersList));
+  }
 
   return result;
 };

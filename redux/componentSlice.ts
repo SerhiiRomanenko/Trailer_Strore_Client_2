@@ -35,8 +35,19 @@ export const fetchComponents = createAsyncThunk<
   { rejectValue: string }
 >("components/fetchComponents", async (_, { rejectWithValue }) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/api/components`);
-    return response.data;
+    const maxRetries = 2;
+    for (let i = 0; i <= maxRetries; i++) {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/api/components`, {
+          timeout: 30000,
+        });
+        return response.data;
+      } catch (error: any) {
+        if (i === maxRetries) throw error;
+        await new Promise((r) => setTimeout(r, 1000 * Math.pow(2, i)));
+      }
+    }
+    return [];
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.message || error.message);
   }
