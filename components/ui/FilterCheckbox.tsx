@@ -8,11 +8,15 @@ interface FilterCheckboxProps {
 
 const FilterCheckbox: React.FC<FilterCheckboxProps> = ({ checked, onChange, label }) => (
   <label
-    className={`flex items-center gap-2.5 cursor-pointer px-2.5 py-1.5 rounded-lg transition-all ${
+    className={`flex items-center gap-2.5 cursor-pointer px-2.5 py-1.5 rounded-lg transition-all select-none ${
       checked
         ? "bg-[var(--color-primary)]/10"
         : "hover:bg-[var(--color-surface-hover)]"
     }`}
+    onClick={(e) => {
+      e.preventDefault();
+      onChange();
+    }}
   >
     <span
       className={`flex-shrink-0 w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${

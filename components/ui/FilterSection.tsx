@@ -3,13 +3,17 @@ import React, { ReactNode } from "react";
 interface FilterSectionProps {
   title: string;
   children: ReactNode;
+  action?: ReactNode;
 }
 
-const FilterSection: React.FC<FilterSectionProps> = ({ title, children }) => (
-  <div className="py-3 border-b border-[var(--color-border)] last:border-b-0">
-    <h3 className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-text-tertiary)] mb-2.5">
-      {title}
-    </h3>
+const FilterSection: React.FC<FilterSectionProps> = ({ title, children, action }) => (
+  <div className="py-5 border-b border-[var(--color-border)] last:border-b-0 first:pt-0">
+    <div className="flex items-center justify-between mb-3">
+      <h3 className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-tertiary)]">
+        {title}
+      </h3>
+      {action}
+    </div>
     {children}
   </div>
 );

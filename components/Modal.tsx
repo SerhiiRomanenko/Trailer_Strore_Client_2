@@ -21,8 +21,9 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
     document.addEventListener("keydown", handleEscape);
     document.body.style.overflow = "hidden";
 
-    // Focus trap
-    const modal = overlayRef.current?.querySelector("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])");
+    const modal = overlayRef.current?.querySelector(
+      "button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])"
+    );
     modal?.focus();
 
     return () => {

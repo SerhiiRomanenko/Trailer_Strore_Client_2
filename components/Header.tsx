@@ -202,9 +202,9 @@ const Header: React.FC<HeaderProps> = ({ route, showFilter, onOpenFilters, activ
                     )}
                     <div className="border-t border-[var(--color-border)] my-1" />
                     <button
-                      onClick={(e) => {
+                      onClick={() => {
                         logout();
-                        handleNav(e, "/login");
+                        setUserMenuOpen(false);
                       }}
                       className="w-full text-left px-3 py-2 text-[13px] text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg mx-1"
                     >
@@ -215,22 +215,15 @@ const Header: React.FC<HeaderProps> = ({ route, showFilter, onOpenFilters, activ
               </div>
             )}
 
-            {/* Login / Register - desktop */}
+            {/* Login button - desktop */}
             {!loading && !currentUser && (
-              <div className="hidden md:flex items-center gap-2 ml-1">
-                <button
-                  onClick={(e) => handleNav(e as any, "/login")}
-                  className="text-[13px] font-medium px-3.5 py-2 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] transition-colors cursor-pointer"
-                >
-                  Вхід
-                </button>
-                <button
-                  onClick={(e) => handleNav(e as any, "/register")}
-                  className="text-[13px] font-medium px-3.5 py-2 rounded-lg bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)] transition-colors cursor-pointer"
-                >
-                  Реєстрація
-                </button>
-              </div>
+              <button
+                onClick={(e) => handleNav(e as any, "/login")}
+                className="hidden md:flex items-center gap-1.5 text-[13px] font-medium px-3.5 py-2 rounded-lg bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)] transition-colors cursor-pointer ml-1"
+              >
+                <User className="h-[18px] w-[18px]" />
+                Увійти
+              </button>
             )}
           </div>
         </div>
@@ -275,20 +268,12 @@ const Header: React.FC<HeaderProps> = ({ route, showFilter, onOpenFilters, activ
             {!loading && !currentUser && (
               <>
                 <div className="border-t border-[var(--color-border)] my-1" />
-                <div className="flex gap-2 pt-1">
-                  <button
-                    onClick={(e) => handleNav(e as any, "/login")}
-                    className="flex-1 text-sm font-medium py-2.5 rounded-lg border border-[var(--color-border)] text-[var(--color-text)] cursor-pointer"
-                  >
-                    Вхід
-                  </button>
-                  <button
-                    onClick={(e) => handleNav(e as any, "/register")}
-                    className="flex-1 text-sm font-medium py-2.5 rounded-lg bg-[var(--color-primary)] text-white cursor-pointer"
-                  >
-                    Реєстрація
-                  </button>
-                </div>
+                <button
+                  onClick={(e) => handleNav(e as any, "/login")}
+                  className="w-full text-sm font-medium py-2.5 rounded-lg bg-[var(--color-primary)] text-white cursor-pointer pt-1"
+                >
+                  Увійти
+                </button>
               </>
             )}
             {!loading && currentUser && (
@@ -309,9 +294,9 @@ const Header: React.FC<HeaderProps> = ({ route, showFilter, onOpenFilters, activ
                   Мої замовлення
                 </a>
                 <button
-                  onClick={(e) => {
+                  onClick={() => {
                     logout();
-                    handleNav(e, "/login");
+                    setMobileMenuOpen(false);
                   }}
                   className="text-left text-sm font-medium px-3 py-2.5 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer"
                 >
@@ -322,6 +307,7 @@ const Header: React.FC<HeaderProps> = ({ route, showFilter, onOpenFilters, activ
           </div>
         </nav>
       </div>
+
     </header>
   );
 };

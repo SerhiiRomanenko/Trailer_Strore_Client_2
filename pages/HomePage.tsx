@@ -50,14 +50,13 @@ const HomePage: React.FC = () => {
   // Register filter state with global context for Header
   useEffect(() => {
     setShowFilter(true);
-    setOpenCallback(() => setIsFiltersOpen(true));
-    setActiveFilterCount(activeFilterCount);
+    setOpenCallback(() => setIsFiltersOpen(prev => !prev));
     return () => {
       setShowFilter(false);
       setOpenCallback(null);
-      setActiveFilterCount(0);
     };
-  }, [setShowFilter, setOpenCallback, setActiveFilterCount]);
+  }, []);
+
 
   useEffect(() => {
     if (trailersStatus === "idle") dispatch(fetchTrailers());
@@ -166,6 +165,11 @@ const HomePage: React.FC = () => {
     (filters.maxPrice ? 1 : 0) +
     (filters.searchQuery ? 1 : 0);
 
+  // Sync active filter count
+  useEffect(() => {
+    setActiveFilterCount(activeFilterCount);
+  }, [activeFilterCount]);
+
   return (
     <div className="py-4 md:py-6">
       {/* Title */}
@@ -218,7 +222,7 @@ const HomePage: React.FC = () => {
         </div>
 
         {/* Desktop sidebar — hidden on mobile */}
-        <aside className="hidden md:block md:w-56 md:flex-shrink-0">
+        <aside className="hidden md:block md:w-64 md:flex-shrink-0">
           <div className="sticky top-16">
             <Filters
               filters={filters}
@@ -226,6 +230,7 @@ const HomePage: React.FC = () => {
               onResetFilters={handleResetFilters}
               allBrands={allBrands}
               allSuspensionTypes={allSuspensionTypes}
+              hasActiveFilters={hasFilters}
             />
           </div>
         </aside>

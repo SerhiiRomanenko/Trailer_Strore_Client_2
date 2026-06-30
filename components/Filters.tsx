@@ -1,5 +1,5 @@
 import React from "react";
-import { Search, X } from "lucide-react";
+import { X } from "lucide-react";
 import { FiltersState } from "../pages/HomePage";
 import FilterSection from "./ui/FilterSection";
 import FilterCheckbox from "./ui/FilterCheckbox";
@@ -10,6 +10,7 @@ interface FiltersProps {
   onResetFilters: () => void;
   allBrands: string[];
   allSuspensionTypes: string[];
+  hasActiveFilters?: boolean;
 }
 
 const Filters: React.FC<FiltersProps> = ({
@@ -18,6 +19,7 @@ const Filters: React.FC<FiltersProps> = ({
   onResetFilters,
   allBrands,
   allSuspensionTypes,
+  hasActiveFilters,
 }) => {
   const toggleBrand = (brand: string) => {
     const next = filters.brands.includes(brand)
@@ -34,17 +36,27 @@ const Filters: React.FC<FiltersProps> = ({
   };
 
   return (
-    <div>
-      {/* Search */}
-      <FilterSection title="Пошук">
+    <div>      {/* Search */}
+      <FilterSection
+        title="Пошук"
+        action={
+          hasActiveFilters && (
+            <button
+              onClick={onResetFilters}
+              className="hidden md:inline text-xs font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-hover)]"
+            >
+              Скинути
+            </button>
+          )
+        }
+      >
         <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--color-text-tertiary)] pointer-events-none" />
           <input
             type="text"
             placeholder="Назва причепа..."
             value={filters.searchQuery}
             onChange={(e) => onFilterChange("searchQuery", e.target.value)}
-            className="w-full text-sm pl-8 pr-8 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all"
+            className="w-full text-sm px-4 pr-8 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all"
           />
           {filters.searchQuery && (
             <button
@@ -59,22 +71,30 @@ const Filters: React.FC<FiltersProps> = ({
 
       {/* Price */}
       <FilterSection title="Ціна, ₴">
-        <div className="flex items-center gap-2">
-          <input
-            type="number"
-            placeholder="Від"
-            value={filters.minPrice}
-            onChange={(e) => onFilterChange("minPrice", e.target.value)}
-            className="flex-1 text-sm px-2.5 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all"
-          />
-          <span className="text-[var(--color-text-tertiary)] text-xs">—</span>
-          <input
-            type="number"
-            placeholder="До"
-            value={filters.maxPrice}
-            onChange={(e) => onFilterChange("maxPrice", e.target.value)}
-            className="flex-1 text-sm px-2.5 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all"
-          />
+        <div className="flex items-center gap-1.5">
+          <div className="relative flex-1">
+            <input
+              type="number"
+              placeholder="Від"
+              value={filters.minPrice}
+              onChange={(e) => onFilterChange("minPrice", e.target.value)}
+              className="w-full text-sm px-2.5 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all pr-7"
+              min="0"
+            />
+            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-[var(--color-text-tertiary)] pointer-events-none">₴</span>
+          </div>
+          <span className="text-[var(--color-text-tertiary)] text-xs shrink-0">—</span>
+          <div className="relative flex-1">
+            <input
+              type="number"
+              placeholder="До"
+              value={filters.maxPrice}
+              onChange={(e) => onFilterChange("maxPrice", e.target.value)}
+              className="w-full text-sm px-2.5 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] outline-none transition-all pr-7"
+              min="0"
+            />
+            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-[var(--color-text-tertiary)] pointer-events-none">₴</span>
+          </div>
         </div>
       </FilterSection>
 

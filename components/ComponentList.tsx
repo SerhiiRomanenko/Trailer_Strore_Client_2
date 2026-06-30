@@ -175,7 +175,7 @@ const ComponentList: React.FC = () => {
         </div>
 
         {/* Desktop sidebar — hidden on mobile */}
-        <aside className="hidden md:block md:w-56 md:flex-shrink-0">
+        <aside className="hidden md:block md:w-64 md:flex-shrink-0">
           <div className="sticky top-16">
             <ComponentFilters
               filters={filters}
@@ -183,6 +183,7 @@ const ComponentList: React.FC = () => {
               onResetFilters={handleResetFilters}
               allBrands={allBrands}
               allComponentTypes={allComponentTypes}
+              hasActiveFilters={hasFilters}
             />
           </div>
         </aside>
