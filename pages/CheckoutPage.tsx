@@ -93,6 +93,39 @@ const CheckoutPage: React.FC = () => {
 
     try {
       const createdOrder = await dispatch(addOrder(newOrderData)).unwrap();
+
+      // Send order notification email
+      try {
+        const itemsList = cartItems
+          .map((item) => `${item.name} × ${item.quantity} = ${(item.price * item.quantity).toLocaleString("uk-UA")} ${item.currency}`)
+          .join("\n");
+
+        const deliveryText = deliveryInfo.method === "pickup"
+          ? "Самовивіз"
+          : `Нова Пошта — ${deliveryInfo.cityName || ""}, ${deliveryInfo.branchName || ""}`;
+
+        const paymentText = paymentInfo.method === "cash" ? "Готівка" : "Картка";
+
+        await emailjs.send(
+          "service_ofl5lph",
+          "template_bk7qet8",
+          {
+            name: customerInfo.name,
+            phoneNumber: customerInfo.phone,
+            city: deliveryInfo.cityName || "Самовивіз",
+            trailer: itemsList,
+            email: customerInfo.email,
+            paymentMethod: paymentText,
+            deliveryMethod: deliveryText,
+            comments: "",
+          },
+          "qQGABM2Wj9sjgRw40"
+        );
+      } catch (emailError) {
+        console.error("Failed to send order email:", emailError);
+        // Don't block the flow — order is already saved
+      }
+
       dispatch(clearCart());
       showToast("Замовлення успішно оформлено!");
       navigate(`/order-confirmation/${createdOrder.id}`);
