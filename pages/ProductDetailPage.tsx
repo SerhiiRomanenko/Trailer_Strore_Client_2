@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../redux/store";
 import { addToCart } from "../redux/cartSlice";
 import { toggleFavorite } from "../redux/favoritesSlice";
-import { fetchTrailerBySlug, clearCurrentProduct } from "../redux/trailerSlice";
+import { fetchTrailerBySlug } from "../redux/trailerSlice";
 import {
   ChevronLeft,
   ChevronRight,
@@ -57,7 +57,6 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) => {
 
   const [activeImage, setActiveImage] = useState(0);
   const prevSlugRef = useRef<string | undefined>(slug);
-  const fetchRef = useRef(false);
 
   const navigate = useCallback((path: string) => {
     window.history.pushState({}, "", path);
@@ -66,29 +65,17 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) => {
 
   // Fetch trailer: use local list first, fall back to API by slug
   useEffect(() => {
-    if (!slug) return;
-
-    // Reset on slug change
     if (slug !== prevSlugRef.current) {
       prevSlugRef.current = slug;
       setActiveImage(0);
-      fetchRef.current = false;
-      dispatch(clearCurrentProduct());
-      return;
     }
 
-    // Only fetch if not in local list and not already fetching
-    if (!fetchRef.current) {
-      const inList = trailers.some((t) => t.slug === slug);
-      if (!inList && detailStatus === "idle") {
-        fetchRef.current = true;
-        dispatch(fetchTrailerBySlug(slug));
-      }
-    }
+    if (!slug) return;
 
-    return () => {
-      dispatch(clearCurrentProduct());
-    };
+    const inList = trailers.some((t) => t.slug === slug);
+    if (!inList && detailStatus !== "loading") {
+      dispatch(fetchTrailerBySlug(slug));
+    }
   }, [slug, dispatch, trailers, detailStatus]);
 
   // SEO metadata
