@@ -244,16 +244,23 @@ const Header: React.FC<HeaderProps> = ({ route, showFilter, onOpenFilters, activ
               { path: "/contacts", label: "Контакти" },
               { path: "/favorites", label: `Обране (${favoritesCount})` },
               { path: "/cart", label: `Кошик (${totalCartItems})` },
-            ].map((item) => (
-              <a
-                key={item.path}
-                href={item.path}
-                onClick={(e) => handleNav(e, item.path)}
-                className="block text-sm font-medium px-3 py-2.5 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] cursor-pointer"
-              >
-                {item.label}
-              </a>
-            ))}
+            ].map((item) => {
+              const itemActive = item.path === "/" ? route === "/" || route.startsWith("/product/") : route.startsWith(item.path);
+              return (
+                <a
+                  key={item.path}
+                  href={item.path}
+                  onClick={(e) => handleNav(e, item.path)}
+                  className={`block text-sm font-medium px-3 py-2.5 rounded-lg cursor-pointer transition-colors ${
+                    itemActive
+                      ? "text-[var(--color-primary)] bg-[var(--color-primary)]/10 font-semibold"
+                      : "text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)]"
+                  }`}
+                >
+                  {item.label}
+                </a>
+              );
+            })}
 
             {currentUser?.role === "admin" && (
               <a
@@ -323,7 +330,7 @@ function NavLink({
   onClick: (e: React.MouseEvent, path: string) => void;
   label: string;
 }) {
-  const isActive = path === "/" ? current === "/" : current.startsWith(path);
+  const isActive = path === "/" ? current === "/" || current.startsWith("/product/") : current.startsWith(path);
   return (
     <a
       href={path}
