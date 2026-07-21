@@ -72,11 +72,11 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) => {
 
     if (!slug) return;
 
-    const inList = trailers.some((t) => t.slug === slug);
-    if (!inList && detailStatus !== "loading") {
+    const alreadyHave = product || currentProduct;
+    if (!alreadyHave && detailStatus !== "loading") {
       dispatch(fetchTrailerBySlug(slug));
     }
-  }, [slug, dispatch, trailers, detailStatus]);
+  }, [slug, dispatch, product, currentProduct, detailStatus]);
 
   // SEO metadata
   useEffect(() => {
