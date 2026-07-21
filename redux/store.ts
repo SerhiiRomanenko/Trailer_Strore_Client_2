@@ -33,7 +33,13 @@ const localStorageMiddleware: Middleware = (store) => (next) => (action) => {
     const componentsList = store.getState().components.list;
     safeSetItem("cachedComponents", JSON.stringify(componentsList));
   }
-  if (actionType === "orders/fetchAllOrders/fulfilled") {
+  if (
+    actionType === "orders/fetchAllOrders/fulfilled" ||
+    actionType === "orders/fetchMyOrders/fulfilled" ||
+    actionType === "orders/addOrder/fulfilled" ||
+    actionType === "orders/updateOrderStatus/fulfilled" ||
+    actionType === "orders/deleteOrder/fulfilled"
+  ) {
     const ordersList = store.getState().orders.list;
     safeSetItem("cachedOrders", JSON.stringify(ordersList));
   }

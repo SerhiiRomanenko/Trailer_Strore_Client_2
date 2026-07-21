@@ -32,11 +32,8 @@ const AdminOrders: React.FC = () => {
   const [orderToDeleteId, setOrderToDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Only fetch initially if idle
-    if (orderStatus === "idle") {
-      dispatch(fetchAllOrders());
-    }
-  }, [dispatch, orderStatus]);
+    dispatch(fetchAllOrders());
+  }, [dispatch]);
 
   const handleStatusChange = async (
     orderId: string,

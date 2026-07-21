@@ -47,10 +47,10 @@ const MyOrdersPage: React.FC = () => {
   }, [currentUser, authLoading]);
 
   useEffect(() => {
-    if (currentUser && orderStatus === "idle") {
+    if (currentUser) {
       dispatch(fetchMyOrders());
     }
-  }, [currentUser, dispatch, orderStatus]);
+  }, [currentUser, dispatch]);
 
   const sortedOrders = useMemo(
     () => [...userOrders].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
