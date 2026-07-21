@@ -8,10 +8,12 @@ import PencilIcon from "../icons/PencilIcon";
 import PlusIcon from "../icons/PlusIcon";
 import SpinnerIcon from "../icons/SpinnerIcon";
 import { useAuth } from "../../contexts/AuthContext";
+import { useToast } from "../Toast";
 
 const AdminAccessories: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { setAuthMessage } = useAuth();
+  const { success: showToast, error: showError } = useToast();
 
   const components = useSelector((state: RootState) => state.components.list);
   const status = useSelector((state: RootState) => state.components.status);
@@ -20,10 +22,8 @@ const AdminAccessories: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    if (status === "idle") {
-      dispatch(fetchComponents());
-    }
-  }, [status, dispatch]);
+    dispatch(fetchComponents());
+  }, [dispatch]);
 
   const filteredAccessories = components.filter((p) =>
     p.name && p.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -37,12 +37,14 @@ const AdminAccessories: React.FC = () => {
           type: "success",
           text: "Комплектуючу успішно видалено!",
         });
+        showToast("Товар успішно видалено");
       } catch (e: any) {
         console.error("Failed to delete component:", e.message);
         setAuthMessage({
           type: "error",
           text: `Помилка видалення: ${e.message}`,
         });
+        showError(`Помилка видалення: ${e.message}`);
       }
     }
   };

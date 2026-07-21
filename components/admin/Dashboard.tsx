@@ -32,27 +32,18 @@ const Dashboard: React.FC = () => {
   const { users, fetchUsers, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    if (orderStatus === "idle") {
-      dispatch(fetchAllOrders());
-    }
+    dispatch(fetchAllOrders());
     if (!authLoading && users.length === 0) {
       fetchUsers();
     }
 
-    if (trailerStatus === "idle") {
-      dispatch(fetchTrailers());
-    }
-    if (componentStatus === "idle") {
-      dispatch(fetchComponents());
-    }
+    dispatch(fetchTrailers());
+    dispatch(fetchComponents());
   }, [
     dispatch,
     fetchUsers,
-    orderStatus,
     authLoading,
     users.length,
-    trailerStatus,
-    componentStatus,
   ]);
 
   const totalRevenue = orders.reduce(

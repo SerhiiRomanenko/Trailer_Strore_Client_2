@@ -11,11 +11,13 @@ import TrashIcon from "../icons/TrashIcon";
 import PencilIcon from "../icons/PencilIcon";
 import PlusIcon from "../icons/PlusIcon";
 import SpinnerIcon from "../icons/SpinnerIcon";
+import { useToast } from "../Toast";
 
 type ProductType = "trailer" | "component";
 
 const AdminProducts: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const { success: showToast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<ProductType>("trailer");
 
@@ -34,20 +36,24 @@ const AdminProducts: React.FC = () => {
   );
 
   useEffect(() => {
-    if (activeTab === "trailer" && status === "idle") {
+    if (activeTab === "trailer") {
       dispatch(fetchTrailers());
-    } else if (activeTab === "component" && status === "idle") {
+    } else {
       dispatch(fetchComponents());
     }
-  }, [activeTab, status, dispatch]);
+  }, [activeTab, dispatch]);
 
-  const handleDelete = (productId: string) => {
-    if (window.confirm("Ви впевнені, що хочете видалити цей товар?")) {
+  const handleDelete = async (productId: string) => {
+    if (!window.confirm("Ви впевнені, що хочете видалити цей товар?")) return;
+    try {
       if (activeTab === "trailer") {
-        dispatch(deleteTrailer(productId));
+        await dispatch(deleteTrailer(productId)).unwrap();
       } else {
-        dispatch(deleteComponent(productId));
+        await dispatch(deleteComponent(productId)).unwrap();
       }
+      showToast("Товар успішно видалено");
+    } catch (e: any) {
+      console.error("Failed to delete:", e);
     }
   };
 

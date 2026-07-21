@@ -18,6 +18,7 @@ import Button from "../Button";
 import TrashIcon from "../icons/TrashIcon";
 import SpinnerIcon from "../icons/SpinnerIcon";
 import { useAuth } from "../../contexts/AuthContext";
+import { useToast } from "../Toast";
 
 interface AdminProductFormProps {
   productId?: string;
@@ -55,6 +56,7 @@ const AdminProductForm: React.FC<AdminProductFormProps> = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { setAuthMessage } = useAuth();
+  const { success, error: showError } = useToast();
 
   const currentProductId = productId;
 
@@ -283,6 +285,7 @@ const AdminProductForm: React.FC<AdminProductFormProps> = ({
             })
           ).unwrap();
         }
+        success("Успішно оновлено!", `${finalProductData.name}`);
         setAuthMessage({
           type: "success",
           text: `${productType} успішно оновлено!`,
@@ -304,11 +307,13 @@ const AdminProductForm: React.FC<AdminProductFormProps> = ({
         } else {
           await dispatch(addComponent(newProductData)).unwrap();
         }
+        success("Успішно додано!", `${finalProductData.name}`);
         setAuthMessage({
           type: "success",
           text: `${productType} успішно додано!`,
         });
       }
+      await new Promise((r) => setTimeout(r, 1500));
       handleNavigation(
         productType === "Причепи" ? "/admin/products" : "/admin/accessories"
       );
@@ -316,6 +321,7 @@ const AdminProductForm: React.FC<AdminProductFormProps> = ({
       console.error("Failed to save product:", e);
       const errorMessage = e.message || "Помилка при збереженні продукту.";
       setAuthMessage({ type: "error", text: errorMessage });
+      showError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -487,19 +493,6 @@ const AdminProductForm: React.FC<AdminProductFormProps> = ({
             className={inputClass}
           ></textarea>
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Повний опис (HTML)
-          </label>
-          <textarea
-            name="description"
-            value={product.description}
-            onChange={handleChange}
-            rows={5}
-            className={inputClass}
-          ></textarea>
-        </div>
-
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Зображення
