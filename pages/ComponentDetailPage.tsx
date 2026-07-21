@@ -258,7 +258,7 @@ const ComponentDetailPage: React.FC<ComponentDetailPageProps> = ({ id }) => {
               {component.name}
             </h1>
 
-            <div className="mb-4">
+            <div className="mb-4 flex items-center gap-2">
               <span
                 className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${
                   component.inStock
@@ -273,6 +273,14 @@ const ComponentDetailPage: React.FC<ComponentDetailPageProps> = ({ id }) => {
                 />
                 {component.inStock ? "В наявності" : "Немає в наявності"}
               </span>
+              {component.isFeatured && (
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-white bg-amber-500/90 px-2 py-1 rounded-full">
+                  <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 6.91-1.01z" />
+                  </svg>
+                  Рекомендовано
+                </span>
+              )}
             </div>
 
             <div className="mb-4">
