@@ -8,6 +8,8 @@ import UsersIcon from "../icons/UsersIcon";
 import ArrowUturnLeftIcon from "../icons/ArrowUturnLeftIcon";
 import ArrowLeftOnRectangleIcon from "../icons/ArrowLeftOnRectangleIcon";
 import WrenchScrewdriverIcon from "../icons/WrenchScrewdriverIcon";
+import { useNewOrdersCount } from "../../hooks/useNewOrdersCount";
+import OrderNotification from "./OrderNotification";
 
 const CloseIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -50,13 +52,26 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
   setIsOpen,
 }) => {
   const { logout } = useAuth();
+  const { newCount, showPopup, dismiss, markChecked } = useNewOrdersCount();
 
   const handleNav = (
     e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>,
     path: string
   ) => {
     e.preventDefault();
+    if (path === "/admin/orders") {
+      markChecked();
+    }
     window.history.pushState({}, "", path);
+    window.dispatchEvent(new Event("locationchange"));
+    if (window.innerWidth < 768) {
+      setIsOpen(false);
+    }
+  };
+
+  const handleNavigateToOrders = () => {
+    markChecked();
+    window.history.pushState({}, "", "/admin/orders");
     window.dispatchEvent(new Event("locationchange"));
     if (window.innerWidth < 768) {
       setIsOpen(false);
@@ -109,6 +124,25 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
               Адмін панель
             </a>
           </div>
+
+          {/* New orders notification badge */}
+          {newCount > 0 && !activeRoute.startsWith("/admin/orders") && (
+            <div
+              onClick={handleNavigateToOrders}
+              className="mb-4 mx-2 flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 cursor-pointer hover:bg-amber-100 transition-colors"
+            >
+              <svg className="h-5 w-5 text-amber-600 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C10.9 2 10 2.9 10 4v2.01C7.03 5.83 4.83 8.03 4 11H2v2h2.09c.78 3.59 3.65 6.46 7.24 7.24.63.13 1.09.54 1.46 1.03.4.55.93.73 1.54.73.61 0 1.15-.18 1.54-.73.37-.49.83-.9 1.46-1.03C19.07 19.5 21.94 16.63 22.09 13H24v-2h-2c-.83-3.13-3.03-5.33-6-6.99V4c0-1.1-.9-2-2-2zm-1 14.07c-2.7-.66-4.87-2.83-5.53-5.53H20.53C19.87 13.24 17.7 15.41 15 16.07V20h-2v-3.93zm0-14.07c0-.55.45-1 1-1s1 .45 1 1v2H11V2z"/>
+              </svg>
+              <span className="text-sm text-amber-800">
+                {newCount === 1 ? "1 нове замовлення" : `${newCount} нових замовлень`}
+              </span>
+              <span className="ml-auto bg-amber-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                {newCount}
+              </span>
+            </div>
+          )}
+
           <nav>
             <ul className="space-y-2">
               {navItems.map((item) => (
@@ -119,7 +153,15 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                     className={linkClasses(item.path, activeRoute)}
                   >
                     <item.icon className="h-5 w-5" />
-                    <span>{item.label}</span>
+                    <span className="flex-1">{item.label}</span>
+                    {item.path === "/admin/orders" && newCount > 0 && !activeRoute.startsWith("/admin/orders") && (
+                      <span className="relative flex h-3 w-3">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500 items-center justify-center text-white text-xs font-bold">
+                          {newCount}
+                        </span>
+                      </span>
+                    )}
                   </a>
                 </li>
               ))}
@@ -154,6 +196,13 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           </ul>
         </div>
       </aside>
+
+      <OrderNotification
+        newCount={newCount}
+        show={showPopup && !activeRoute.startsWith("/admin/orders")}
+        onDismiss={dismiss}
+        onNavigate={handleNavigateToOrders}
+      />
     </>
   );
 };

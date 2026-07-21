@@ -14,6 +14,14 @@ import Button from "../Button"; // Assuming you have a Button component
 
 const API_BASE_URL = import.meta.env.VITE_BASE_API_URL || "https://trailer-strore-server.onrender.com";
 
+const statusLabels: Record<OrderStatus, string> = {
+  Processing: "Очікування",
+  Accepted: "Прийнято в обробку",
+  Shipped: "В дорозі",
+  Delivered: "Доставлено",
+  Cancelled: "Скасовано",
+};
+
 const AdminOrders: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { setAuthMessage } = useAuth();
@@ -45,7 +53,7 @@ const AdminOrders: React.FC = () => {
       ).unwrap();
       setAuthMessage({
         type: "success",
-        text: `Статус замовлення ${orderId} оновлено на ${newStatus}`,
+        text: `Статус замовлення ${orderId} оновлено на «${statusLabels[newStatus]}»`,
       });
       // The updateOrderStatus thunk should ideally update the Redux state directly.
 
@@ -120,6 +128,7 @@ const AdminOrders: React.FC = () => {
 
   const statuses: OrderStatus[] = [
     "Processing",
+    "Accepted",
     "Shipped",
     "Delivered",
     "Cancelled",
@@ -165,7 +174,7 @@ const AdminOrders: React.FC = () => {
           <option value="All">Всі</option>
           {statuses.map((status) => (
             <option key={status} value={status} className="text-gray-800">
-              {status}
+              {statusLabels[status]}
             </option>
           ))}
         </select>
@@ -296,6 +305,11 @@ const AdminOrders: React.FC = () => {
                                        : ""
                                    }
                                    ${
+                                     order.status === "Accepted"
+                                       ? "bg-indigo-100 border-indigo-300 text-indigo-800 focus:ring-indigo-500"
+                                       : ""
+                                   }
+                                   ${
                                      order.status === "Cancelled"
                                        ? "bg-red-100 border-red-300 text-red-800 focus:ring-red-500"
                                        : ""
@@ -304,7 +318,7 @@ const AdminOrders: React.FC = () => {
                       >
                         {statuses.map((status) => (
                           <option key={status} value={status}>
-                            {status}
+                            {statusLabels[status]}
                           </option>
                         ))}
                       </select>
@@ -402,6 +416,11 @@ const AdminOrders: React.FC = () => {
                                        : ""
                                    }
                                    ${
+                                     order.status === "Accepted"
+                                       ? "bg-indigo-100 border-indigo-300 text-indigo-800 focus:ring-indigo-500"
+                                       : ""
+                                   }
+                                   ${
                                      order.status === "Cancelled"
                                        ? "bg-red-100 border-red-300 text-red-800 focus:ring-red-500"
                                        : ""
@@ -410,7 +429,7 @@ const AdminOrders: React.FC = () => {
                     >
                       {statuses.map((status) => (
                         <option key={status} value={status}>
-                          {status}
+                          {statusLabels[status]}
                         </option>
                       ))}
                     </select>
@@ -569,6 +588,12 @@ const AdminOrders: React.FC = () => {
                                        }
                                        ${
                                          selectedOrderForModal.status ===
+                                         "Accepted"
+                                           ? "bg-indigo-100 border-indigo-300 text-indigo-800 focus:ring-indigo-500"
+                                           : ""
+                                       }
+                                       ${
+                                         selectedOrderForModal.status ===
                                          "Cancelled"
                                            ? "bg-red-100 border-red-300 text-red-800 focus:ring-red-500"
                                            : ""
@@ -577,7 +602,7 @@ const AdminOrders: React.FC = () => {
                         >
                           {statuses.map((status) => (
                             <option key={status} value={status}>
-                              {status}
+                              {statusLabels[status]}
                             </option>
                           ))}
                         </select>

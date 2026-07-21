@@ -6,7 +6,7 @@ export interface OrderItem extends Product {
   quantity: number;
 }
 
-export type OrderStatus = "Processing" | "Shipped" | "Delivered" | "Cancelled";
+export type OrderStatus = "Processing" | "Accepted" | "Shipped" | "Delivered" | "Cancelled";
 
 export interface Order {
   id: string;

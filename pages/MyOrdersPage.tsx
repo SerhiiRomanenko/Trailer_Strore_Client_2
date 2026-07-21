@@ -13,7 +13,8 @@ import Modal from "../components/Modal";
 import TrailerLoading from "../components/TrailerLoading";
 
 const statusLabels: Record<OrderStatus, string> = {
-  Processing: "Обробка",
+  Processing: "Очікування",
+  Accepted: "Прийнято в обробку",
   Shipped: "В дорозі",
   Delivered: "Доставлено",
   Cancelled: "Скасовано",
@@ -21,6 +22,7 @@ const statusLabels: Record<OrderStatus, string> = {
 
 const statusColors: Record<OrderStatus, string> = {
   Processing: "bg-amber-50 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
+  Accepted: "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300",
   Shipped: "bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
   Delivered: "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
   Cancelled: "bg-red-50 text-red-600 dark:bg-red-900/40 dark:text-red-300",
