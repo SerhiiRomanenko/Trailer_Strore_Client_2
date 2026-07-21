@@ -165,7 +165,7 @@ const componentSlice = createSlice({
       .addCase(updateComponent.fulfilled, (state, action) => {
         const index = state.list.findIndex((p) => p.id === action.payload.id);
         if (index !== -1) {
-          state.list[index] = action.payload;
+          state.list[index] = { ...state.list[index], ...action.payload };
         }
       })
       .addCase(updateComponent.rejected, (state, action) => {

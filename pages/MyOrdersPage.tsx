@@ -156,7 +156,7 @@ const MyOrdersPage: React.FC = () => {
                 onClick={() =>
                   setExpandedOrder(expandedOrder === order.id ? null : order.id)
                 }
-                className="w-full flex items-center justify-center gap-1 py-1.5 text-xs text-[var(--color-text-tertiary)] hover:text-[var(--color-text)] border-t border-[var(--color-border)] transition-colors"
+                className="w-full flex items-center justify-center gap-1 py-1.5 text-xs text-[var(--color-text-tertiary)] hover:text-[var(--color-text)] border-t border-[var(--color-border)] transition-colors cursor-pointer"
               >
                 {expandedOrder === order.id ? "Приховати" : "Деталі"}
                 {expandedOrder === order.id ? (

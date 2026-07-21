@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
+import React, { useState, useCallback, useMemo, useEffect, useRef, useLayoutEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Product } from "../types";
 import ProductList from "../components/TrailerList";
@@ -68,11 +68,7 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     setShowFilter(true);
     setOpenCallback(() => setIsFiltersOpenRef.current(prev => !prev));
-    return () => {
-      setShowFilter(false);
-      setOpenCallback(null);
-    };
-  }, []);
+  }, [setShowFilter, setOpenCallback]);
 
   // Extract unique brands and suspension types from loaded data
   const { allBrands, allSuspensionTypes } = useMemo(() => {
@@ -168,10 +164,10 @@ const HomePage: React.FC = () => {
     (filters.maxPrice ? 1 : 0) +
     (filters.searchQuery ? 1 : 0);
 
-  // Sync active filter count with global context
+  // Sync active filter count with global context (ref-based, no re-render cascade)
   useEffect(() => {
     setActiveFilterCount(activeFilterCount);
-  }, [activeFilterCount]);
+  }, [activeFilterCount, setActiveFilterCount]);
 
   // --- Render logic ---
   // 1. Loading and no cached data: show skeletons

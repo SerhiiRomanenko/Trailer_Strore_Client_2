@@ -76,7 +76,7 @@ const Header: React.FC<HeaderProps> = ({ route, showFilter, onOpenFilters, activ
           {/* Mobile menu toggle */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 -ml-1 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] transition-colors"
+            className="md:hidden p-2 -ml-1 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] transition-colors cursor-pointer"
           >
             {mobileMenuOpen ? (
               <X className="h-5 w-5" />
@@ -165,7 +165,7 @@ const Header: React.FC<HeaderProps> = ({ route, showFilter, onOpenFilters, activ
               <div className="relative pl-1" ref={userMenuRef}>
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center gap-1.5 px-2 py-2 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] transition-colors"
+                  className="flex items-center gap-1.5 px-2 py-2 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] transition-colors cursor-pointer"
                 >
                   <User className="h-[18px] w-[18px]" />
                   <ChevronDown
@@ -206,7 +206,7 @@ const Header: React.FC<HeaderProps> = ({ route, showFilter, onOpenFilters, activ
                         logout();
                         setUserMenuOpen(false);
                       }}
-                      className="w-full text-left px-3 py-2 text-[13px] text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg mx-1"
+                      className="w-full text-left px-3 py-2 text-[13px] text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg mx-1 cursor-pointer"
                     >
                       Вийти
                     </button>

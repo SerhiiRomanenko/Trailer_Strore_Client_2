@@ -118,6 +118,7 @@ const ContactsPage: React.FC = () => {
                 value={formState.name}
                 onChange={handleChange}
                 placeholder="Ваше ім'я"
+                className="w-full"
               />
             </div>
             <div>
@@ -132,6 +133,7 @@ const ContactsPage: React.FC = () => {
                 value={formState.email}
                 onChange={handleChange}
                 placeholder="your@email.com"
+                className="w-full"
               />
             </div>
             <div>
@@ -145,7 +147,7 @@ const ContactsPage: React.FC = () => {
                 rows={5}
                 value={formState.message}
                 onChange={handleChange}
-                className="resize-none"
+                className="w-full resize-none"
                 placeholder="Ваше повідомлення..."
               />
             </div>

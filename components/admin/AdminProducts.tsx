@@ -30,7 +30,7 @@ const AdminProducts: React.FC = () => {
   );
 
   const filteredProducts = data.filter((p) =>
-    p.name.toLowerCase().includes(searchTerm.toLowerCase())
+    p.name && p.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   useEffect(() => {
@@ -132,11 +132,11 @@ const AdminProducts: React.FC = () => {
                     className="bg-white border-b hover:bg-gray-50"
                   >
                     <td className="px-6 py-4 font-medium text-gray-900">
-                      {product.name}
+                      {product.name || "Невідомий товар"}
                     </td>
                     <td className="px-6 py-4">{product.brand || "N/A"}</td>
                     <td className="px-6 py-4">
-                      {product.price.toLocaleString("uk-UA")} {product.currency}
+                      {product.price?.toLocaleString("uk-UA") || "—"} {product.currency}
                     </td>
                     <td className="px-6 py-4">
                       <span

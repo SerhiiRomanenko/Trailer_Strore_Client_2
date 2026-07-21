@@ -252,7 +252,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) => {
                 className={`flex-1 text-sm font-medium py-2.5 px-4 rounded-lg transition-all ${
                   isOutOfStock
                     ? "bg-[var(--color-bg)] text-[var(--color-text-tertiary)] cursor-not-allowed"
-                    : "bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hover)] active:scale-[0.98]"
+                    : "bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hover)] active:scale-[0.98] cursor-pointer"
                 }`}
               >
                 Додати в кошик

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useCallback, useState } from "react";
+import React, { createContext, useContext, useCallback, useState, useRef, useMemo } from "react";
 
 interface FilterUIContext {
   showFilter: boolean;
@@ -20,13 +20,29 @@ const FilterUIContext = createContext<FilterUIContext>({
 
 export const FilterUIProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [showFilter, setShowFilter] = useState(false);
-  const [onOpenFilters, setOpenCallback] = useState<(() => void) | null>(null);
-  const [activeFilterCount, setActiveFilterCount] = useState(0);
+  const callbackRef = useRef<(() => void) | null>(null);
+  const countRef = useRef(0);
+
+  const setOpenCallback = useCallback((cb: (() => void) | null) => {
+    callbackRef.current = cb;
+  }, []);
+
+  const setActiveFilterCount = useCallback((count: number) => {
+    countRef.current = count;
+  }, []);
+
+  // Only changes when showFilter toggles — callback/count read from refs
+  const value = useMemo(() => ({
+    showFilter,
+    onOpenFilters: callbackRef.current,
+    activeFilterCount: countRef.current,
+    setShowFilter,
+    setOpenCallback,
+    setActiveFilterCount,
+  }), [showFilter, setShowFilter, setOpenCallback, setActiveFilterCount]);
 
   return (
-    <FilterUIContext.Provider
-      value={{ showFilter, onOpenFilters, activeFilterCount, setShowFilter, setOpenCallback, setActiveFilterCount }}
-    >
+    <FilterUIContext.Provider value={value}>
       {children}
     </FilterUIContext.Provider>
   );

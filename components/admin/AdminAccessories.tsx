@@ -26,7 +26,7 @@ const AdminAccessories: React.FC = () => {
   }, [status, dispatch]);
 
   const filteredAccessories = components.filter((p) =>
-    p.name.toLowerCase().includes(searchTerm.toLowerCase())
+    p.name && p.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleDelete = async (productId: string) => {

@@ -58,6 +58,12 @@
       .container {
         max-width: 1360px !important;
       }
+      button, a, [onclick], label, [role="button"], td[onclick], div[onclick] {
+        cursor: pointer;
+      }
+      .cursor-not-allowed, button[disabled], a[disabled] {
+        cursor: not-allowed !important;
+      }
     </style>
   </head>
   <body>

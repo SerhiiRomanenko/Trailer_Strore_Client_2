@@ -65,7 +65,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
   const linkClasses = (path: string, currentRoute: string) => {
     const base =
-      "flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg transition-colors duration-200";
+      "flex items-center gap-3 px-4 py-3 text-gray-700 rounded-lg transition-colors duration-200 cursor-pointer";
     const isActive =
       path === "/admin" ? currentRoute === path : currentRoute.startsWith(path);
     return `${base} ${
@@ -97,7 +97,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           </div>
           <button
             onClick={() => setIsOpen(false)}
-            className="p-2 text-gray-600"
+            className="p-2 text-gray-600 cursor-pointer"
           >
             <CloseIcon className="h-6 w-6" />
           </button>
