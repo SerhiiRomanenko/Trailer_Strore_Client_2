@@ -30,6 +30,8 @@ const Header: React.FC<HeaderProps> = ({ route, showFilter, onOpenFilters, activ
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const mobileToggleRef = useRef<HTMLButtonElement>(null);
 
   const totalCartItems = useSelector((state: RootState) =>
     state.cart.items.reduce((total, item) => total + item.quantity, 0)
@@ -50,14 +52,28 @@ const Header: React.FC<HeaderProps> = ({ route, showFilter, onOpenFilters, activ
   );
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+    const handleClick = (event: MouseEvent) => {
+      const target = event.target as Node;
+
+      // Close user dropdown
+      if (userMenuRef.current && !userMenuRef.current.contains(target)) {
         setUserMenuOpen(false);
       }
+
+      // Close mobile menu
+      if (
+        mobileMenuOpen &&
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(target) &&
+        mobileToggleRef.current &&
+        !mobileToggleRef.current.contains(target)
+      ) {
+        setMobileMenuOpen(false);
+      }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [mobileMenuOpen]);
 
   const iconBtn =
     "relative p-2 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] transition-colors cursor-pointer";
@@ -75,6 +91,7 @@ const Header: React.FC<HeaderProps> = ({ route, showFilter, onOpenFilters, activ
         <div className="flex items-center h-14 md:h-16 gap-3 md:gap-4">
           {/* Mobile menu toggle */}
           <button
+            ref={mobileToggleRef}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="md:hidden p-2 -ml-1 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] transition-colors cursor-pointer"
           >
@@ -231,6 +248,7 @@ const Header: React.FC<HeaderProps> = ({ route, showFilter, onOpenFilters, activ
 
       {/* Mobile menu */}
       <div
+        ref={mobileMenuRef}
         className={`md:hidden overflow-hidden transition-all duration-300 border-t border-[var(--color-border)] bg-[var(--color-surface)] ${
           mobileMenuOpen ? "max-h-[75vh]" : "max-h-0"
         }`}
