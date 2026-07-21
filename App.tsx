@@ -20,8 +20,6 @@ import AdminLayout from "./components/admin/AdminLayout";
 import MyOrdersPage from "./pages/MyOrdersPage";
 import MyProfilePage from "./pages/MyProfilePage";
 import { AppDispatch } from "./redux/store";
-import { fetchTrailers } from "./redux/trailerSlice";
-import { fetchComponents } from "./redux/componentSlice";
 import { ToastProvider } from "./components/Toast";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { FilterUIProvider, useFilterUI } from "./contexts/FilterContext";
@@ -30,12 +28,6 @@ const AppContent: React.FC = () => {
   const { currentUser } = useAuth();
   const { showFilter, onOpenFilters, activeFilterCount } = useFilterUI();
   const [route, setRoute] = useState(window.location.pathname);
-  const dispatch = useDispatch<AppDispatch>();
-
-  useEffect(() => {
-    dispatch(fetchTrailers());
-    dispatch(fetchComponents());
-  }, [dispatch]);
 
   useEffect(() => {
     const handleLocationChange = () => {

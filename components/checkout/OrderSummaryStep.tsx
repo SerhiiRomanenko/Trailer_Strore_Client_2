@@ -10,9 +10,10 @@ interface Props {
     paymentInfo: PaymentInfo;
     onConfirm: () => void;
     onBack: () => void;
+    isSubmitting?: boolean;
 }
 
-const OrderSummaryStep: React.FC<Props> = ({ customerInfo, deliveryInfo, paymentInfo, onConfirm, onBack }) => {
+const OrderSummaryStep: React.FC<Props> = ({ customerInfo, deliveryInfo, paymentInfo, onConfirm, onBack, isSubmitting }) => {
     const cartItems = useSelector((state: RootState) => state.cart.items);
     const totalPrice = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
@@ -72,7 +73,9 @@ const OrderSummaryStep: React.FC<Props> = ({ customerInfo, deliveryInfo, payment
 
             <div className="mt-6 flex justify-between items-center">
                 <Button type="button" variant="secondary" onClick={onBack}>Назад</Button>
-                <Button type="button" variant="accent" onClick={onConfirm}>Підтвердити замовлення</Button>
+                <Button type="button" variant="accent" onClick={onConfirm} disabled={isSubmitting}>
+                  {isSubmitting ? "Оформлюємо..." : "Підтвердити замовлення"}
+                </Button>
             </div>
         </div>
     );

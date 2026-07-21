@@ -5,29 +5,37 @@ import ordersReducer from "./ordersSlice";
 import trailersReducer from "./trailerSlice";
 import componentsReducer from "./componentSlice";
 
+const safeSetItem = (key: string, value: string) => {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // localStorage full or disabled — silent fail, no crash
+  }
+};
+
 const localStorageMiddleware: Middleware = (store) => (next) => (action) => {
   const result = next(action);
   const actionType = (action as { type?: string })?.type;
 
   if (actionType?.startsWith("cart/")) {
     const cartState = store.getState().cart;
-    localStorage.setItem("cartItems", JSON.stringify(cartState.items));
+    safeSetItem("cartItems", JSON.stringify(cartState.items));
   }
   if (actionType?.startsWith("favorites/")) {
     const favoritesState = store.getState().favorites;
-    localStorage.setItem("favoriteItems", JSON.stringify(favoritesState.ids));
+    safeSetItem("favoriteItems", JSON.stringify(favoritesState.ids));
   }
   if (actionType === "trailers/fetchTrailers/fulfilled") {
     const trailersList = store.getState().trailers.list;
-    localStorage.setItem("cachedTrailers", JSON.stringify(trailersList));
+    safeSetItem("cachedTrailers", JSON.stringify(trailersList));
   }
   if (actionType === "components/fetchComponents/fulfilled") {
     const componentsList = store.getState().components.list;
-    localStorage.setItem("cachedComponents", JSON.stringify(componentsList));
+    safeSetItem("cachedComponents", JSON.stringify(componentsList));
   }
   if (actionType === "orders/fetchAllOrders/fulfilled") {
     const ordersList = store.getState().orders.list;
-    localStorage.setItem("cachedOrders", JSON.stringify(ordersList));
+    safeSetItem("cachedOrders", JSON.stringify(ordersList));
   }
 
   return result;

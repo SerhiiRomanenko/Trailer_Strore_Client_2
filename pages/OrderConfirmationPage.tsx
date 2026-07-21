@@ -1,18 +1,28 @@
-import React, { useEffect } from "react";
-import { useSelector } from "react-redux";
-import { RootState } from "../redux/store";
+import React, { useEffect, useCallback } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "../redux/store";
+import { fetchOrderById } from "../redux/ordersSlice";
 import { CheckCircle2, Copy, ArrowRight } from "lucide-react";
 import { useToast } from "../components/Toast";
+import TrailerLoading from "../components/TrailerLoading";
 
 interface Props {
   orderId: string;
 }
 
 const OrderConfirmationPage: React.FC<Props> = ({ orderId }) => {
-  const order = useSelector((state: RootState) =>
-    state.orders.list.find((o) => o.id === orderId)
-  );
+  const dispatch = useDispatch<AppDispatch>();
+  const { list: orders, detailStatus } = useSelector((state: RootState) => state.orders);
   const { success } = useToast();
+
+  const order = orders.find((o) => o.id === orderId);
+
+  // Fetch from API if not in Redux state (direct URL access)
+  useEffect(() => {
+    if (!order && detailStatus === "idle") {
+      dispatch(fetchOrderById(orderId));
+    }
+  }, [order, orderId, dispatch, detailStatus]);
 
   useEffect(() => {
     document.title = "Замовлення підтверджено | ПричепМаркет";
@@ -41,6 +51,10 @@ const OrderConfirmationPage: React.FC<Props> = ({ orderId }) => {
     if (!order) return "";
     return order.payment.method === "cash" ? "Готівка" : "Картка";
   };
+
+  if (!order && detailStatus === "loading") {
+    return <TrailerLoading label="Завантаження деталей замовлення..." />;
+  }
 
   if (!order) {
     return (

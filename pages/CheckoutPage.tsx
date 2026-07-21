@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useAuth } from "../contexts/AuthContext";
 import { RootState, AppDispatch } from "../redux/store";
 import { addOrder } from "../redux/ordersSlice";
 import { clearCart } from "../redux/cartSlice";
 import { ArrowLeft } from "lucide-react";
+import { useToast } from "../components/Toast";
 
 import Stepper from "../components/checkout/Stepper";
 import CustomerInfoStep from "../components/checkout/CustomerInfoStep";
 import DeliveryPaymentStep from "../components/checkout/DeliveryPaymentStep";
 import OrderSummaryStep from "../components/checkout/OrderSummaryStep";
 import Button from "../components/Button";
+import TrailerLoading from "../components/TrailerLoading";
 
 export interface CustomerInfo {
   name: string;
@@ -34,10 +36,12 @@ const STEPS = ["Контактна інформація", "Доставка і �
 
 const CheckoutPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { currentUser, setAuthMessage } = useAuth();
+  const { currentUser } = useAuth();
+  const { success: showToast, error: showError } = useToast();
   const cartItems = useSelector((state: RootState) => state.cart.items);
 
   const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     name: currentUser?.name || "",
@@ -63,7 +67,10 @@ const CheckoutPage: React.FC = () => {
   const handleNextStep = () => setCurrentStep((prev) => prev + 1);
   const handlePrevStep = () => setCurrentStep((prev) => prev - 1);
 
-  const handlePlaceOrder = async () => {
+  const handlePlaceOrder = useCallback(async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
     const newOrderData = {
       date: new Date().toISOString(),
       customer: customerInfo,
@@ -86,18 +93,17 @@ const CheckoutPage: React.FC = () => {
     try {
       const createdOrder = await dispatch(addOrder(newOrderData)).unwrap();
       dispatch(clearCart());
-      setAuthMessage({
-        type: "success",
-        text: "Замовлення успішно оформлено!",
-      });
+      showToast("Замовлення успішно оформлено!");
       navigate(`/order-confirmation/${createdOrder.id}`);
     } catch (error: any) {
       console.error("Failed to place order:", error);
       const errorMessage =
-        error.message || "Не вдалося створити замовлення. Спробуйте ще раз.";
-      setAuthMessage({ type: "error", text: errorMessage });
+        error || "Не вдалося створити замовлення. Спробуйте ще раз.";
+      showError(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
-  };
+  }, [isSubmitting, customerInfo, deliveryInfo, paymentInfo, cartItems, dispatch, navigate, showToast, showError]);
 
   const renderStep = () => {
     switch (currentStep) {
@@ -128,6 +134,7 @@ const CheckoutPage: React.FC = () => {
             paymentInfo={paymentInfo}
             onConfirm={handlePlaceOrder}
             onBack={handlePrevStep}
+            isSubmitting={isSubmitting}
           />
         );
       default:

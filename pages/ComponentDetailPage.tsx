@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchComponentById } from "../redux/componentSlice";
 import { addToCart } from "../redux/cartSlice";
@@ -8,13 +8,12 @@ import {
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
-  Loader2,
   Star,
   Package,
   Truck,
-  Shield,
 } from "lucide-react";
 import { useToast } from "../components/Toast";
+import TrailerLoading from "../components/TrailerLoading";
 
 interface ComponentDetailPageProps {
   id?: string;
@@ -26,14 +25,26 @@ const ComponentDetailPage: React.FC<ComponentDetailPageProps> = ({ id }) => {
 
   const {
     list: componentsList,
-    status,
+    status: listStatus,
+    detailStatus,
     error,
   } = useSelector((state: RootState) => state.components);
 
+  // Find from pre-loaded list first, fall back to API fetch
   const component = useMemo(
     () => componentsList.find((c) => c.id === id),
     [componentsList, id]
   );
+
+  const isLoaded = !!component;
+  const isLoading = useMemo(() => {
+    if (isLoaded) return false;
+    if (detailStatus === "loading") return true;
+    if (detailStatus === "idle" && listStatus === "loading") return true;
+    return false;
+  }, [isLoaded, detailStatus, listStatus]);
+
+  const isFailed = detailStatus === "failed" && !isLoaded;
 
   const favoriteIdsArray = useSelector(
     (state: RootState): string[] => state.favorites.ids
@@ -44,24 +55,30 @@ const ComponentDetailPage: React.FC<ComponentDetailPageProps> = ({ id }) => {
   );
 
   const [activeImage, setActiveImage] = useState(0);
+  const prevIdRef = useRef<string | undefined>(id);
 
   const navigate = useCallback((path: string) => {
     window.history.pushState({}, "", path);
     window.dispatchEvent(new Event("locationchange"));
   }, []);
 
+  // Fetch individually only if not in the pre-loaded list
   useEffect(() => {
-    if (
-      id &&
-      ((!component && status === "idle") ||
-        (component && component.id !== id && status !== "loading"))
-    ) {
+    if (!id) return;
+
+    if (id !== prevIdRef.current) {
+      prevIdRef.current = id;
+      setActiveImage(0);
+    }
+
+    const inList = !!component;
+    if (!inList && detailStatus === "idle") {
       dispatch(fetchComponentById(id));
     }
-  }, [id, component, status, dispatch]);
+  }, [id, component, detailStatus, dispatch]);
 
   useEffect(() => {
-    if (status === "succeeded" && component) {
+    if (isLoaded && component) {
       document.title =
         component.metaTitle || `${component.name} | ПричепМаркет`;
 
@@ -78,7 +95,7 @@ const ComponentDetailPage: React.FC<ComponentDetailPageProps> = ({ id }) => {
           `Деталі комплектуючої ${component.name}.`
       );
     }
-  }, [component, status]);
+  }, [isLoaded, component]);
 
   const handleAddToCart = useCallback(() => {
     if (component) {
@@ -113,7 +130,6 @@ const ComponentDetailPage: React.FC<ComponentDetailPageProps> = ({ id }) => {
 
   const imagesForComponent = useCallback(() => {
     if (component?.images && component.images.length > 0) return component.images;
-    if (component?.imageUrl) return [component.imageUrl];
     return [];
   }, [component]);
 
@@ -127,16 +143,11 @@ const ComponentDetailPage: React.FC<ComponentDetailPageProps> = ({ id }) => {
     );
   }
 
-  if (status === "loading" || (!component && status === "idle")) {
-    return (
-      <div className="flex items-center justify-center py-20 gap-3">
-        <Loader2 className="h-5 w-5 text-[var(--color-primary)] animate-spin" />
-        <span className="text-sm text-[var(--color-text-secondary)]">Завантаження...</span>
-      </div>
-    );
+  if (isLoading) {
+    return <TrailerLoading label="Завантаження..." />;
   }
 
-  if (status === "failed") {
+  if (isFailed) {
     return (
       <div className="text-center py-20">
         <h1 className="text-lg font-semibold text-[var(--color-text)] mb-2">
@@ -306,7 +317,6 @@ const ComponentDetailPage: React.FC<ComponentDetailPageProps> = ({ id }) => {
             <div className="grid grid-cols-2 gap-3 pt-4 border-t border-[var(--color-border)]">
               {[
                 { icon: <Truck className="h-4 w-4" />, text: "Доставка" },
-                // { icon: <Shield className="h-4 w-4" />, text: "Гарантія" },
                 { icon: <Package className="h-4 w-4" />, text: "Якість" },
               ].map((item, i) => (
                 <div key={i} className="flex flex-col items-center gap-1.5 text-center">

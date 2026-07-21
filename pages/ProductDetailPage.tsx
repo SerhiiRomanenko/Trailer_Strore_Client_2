@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useMemo } from "react";
+import React, { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../redux/store";
 import { addToCart } from "../redux/cartSlice";
@@ -8,13 +8,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Star,
-  Loader2,
   ArrowLeft,
   Package,
-  Truck,
   Shield,
 } from "lucide-react";
 import { useToast } from "../components/Toast";
+import TrailerLoading from "../components/TrailerLoading";
 
 interface ProductDetailPageProps {
   slug: string;
@@ -24,13 +23,29 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) => {
   const dispatch: AppDispatch = useDispatch();
   const { success, info } = useToast();
 
-  const product = useSelector(
-    (state: RootState) => state.trailers.currentProduct
-  );
-  const productStatus = useSelector(
-    (state: RootState) => state.trailers.status
-  );
-  const productError = useSelector((state: RootState) => state.trailers.error);
+  const {
+    list: trailers,
+    currentProduct,
+    status: listStatus,
+    detailStatus,
+    error: productError,
+  } = useSelector((state: RootState) => state.trailers);
+
+  // Find from pre-loaded list first, fall back to API-fetched product
+  const product = useMemo(() => {
+    const fromList = trailers.find((t) => t.slug === slug);
+    if (fromList) return fromList;
+    return currentProduct;
+  }, [trailers, slug, currentProduct]);
+
+  const isLoading = useMemo(() => {
+    if (product) return false;
+    if (detailStatus === "loading") return true;
+    if (detailStatus === "idle" && listStatus === "loading") return true;
+    return false;
+  }, [product, detailStatus, listStatus]);
+
+  const isFailed = detailStatus === "failed" && !product;
 
   const favoriteIdsArray = useSelector(
     (state: RootState) => state.favorites.ids
@@ -41,25 +56,49 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) => {
   );
 
   const [activeImage, setActiveImage] = useState(0);
+  const prevSlugRef = useRef<string | undefined>(slug);
+  const fetchRef = useRef(false);
 
   const navigate = useCallback((path: string) => {
     window.history.pushState({}, "", path);
     window.dispatchEvent(new Event("locationchange"));
   }, []);
 
+  // Fetch trailer: use local list first, fall back to API by slug
   useEffect(() => {
-    if (slug) dispatch(fetchTrailerBySlug(slug));
-    return () => dispatch(clearCurrentProduct());
-  }, [dispatch, slug]);
+    if (!slug) return;
+
+    // Reset on slug change
+    if (slug !== prevSlugRef.current) {
+      prevSlugRef.current = slug;
+      setActiveImage(0);
+      fetchRef.current = false;
+      dispatch(clearCurrentProduct());
+      return;
+    }
+
+    // Only fetch if not in local list and not already fetching
+    if (!fetchRef.current) {
+      const inList = trailers.some((t) => t.slug === slug);
+      if (!inList && detailStatus === "idle") {
+        fetchRef.current = true;
+        dispatch(fetchTrailerBySlug(slug));
+      }
+    }
+
+    return () => {
+      dispatch(clearCurrentProduct());
+    };
+  }, [slug, dispatch, trailers, detailStatus]);
 
   // SEO metadata
   useEffect(() => {
-    if (productStatus === "succeeded" && product) {
+    if (product) {
       document.title = product.metaTitle || `${product.name} | ПричепМаркет`;
       const descTag = document.querySelector('meta[name="description"]');
       if (descTag) descTag.setAttribute("content", product.metaDescription);
     }
-  }, [product, productStatus]);
+  }, [product]);
 
   const handleAddToCart = useCallback(() => {
     if (product) {
@@ -92,20 +131,15 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) => {
     [product]
   );
 
-  if (productStatus === "loading") {
-    return (
-      <div className="flex items-center justify-center py-20 gap-3">
-        <Loader2 className="h-5 w-5 text-[var(--color-primary)] animate-spin" />
-        <span className="text-sm text-[var(--color-text-secondary)]">Завантаження...</span>
-      </div>
-    );
+  if (isLoading) {
+    return <TrailerLoading label="Завантаження..." />;
   }
 
-  if (productStatus === "failed" || !product) {
+  if (isFailed || !product) {
     return (
       <div className="text-center py-20">
         <h1 className="text-lg font-semibold text-[var(--color-text)] mb-2">
-          {productStatus === "failed" ? "Помилка завантаження" : "Товар не знайдено"}
+          {isFailed ? "Помилка завантаження" : "Товар не знайдено"}
         </h1>
         <p className="text-sm text-[var(--color-text-tertiary)] mb-4">{productError || "Спробуйте перейти на головну сторінку"}</p>
         <button
@@ -183,18 +217,15 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) => {
 
           {/* Product info */}
           <div className="p-4 md:p-6 flex flex-col">
-            {/* Brand */}
             <p className="text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-wide mb-1">
               {product.brand}
               {product.model ? ` · ${product.model}` : ""}
             </p>
 
-            {/* Name */}
             <h1 className="text-xl md:text-2xl font-bold text-[var(--color-text)] leading-tight mb-3">
               {product.name}
             </h1>
 
-            {/* Stock */}
             <div className="mb-4">
               <span
                 className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${
@@ -212,7 +243,6 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) => {
               </span>
             </div>
 
-            {/* Price */}
             <div className="mb-4">
               <span className="text-2xl font-bold text-[var(--color-text)]">
                 {product.price?.toLocaleString("uk-UA")}
@@ -222,14 +252,12 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) => {
               </span>
             </div>
 
-            {/* Short description */}
             {product.shortDescription && (
               <p className="text-sm text-[var(--color-text-secondary)] mb-6 leading-relaxed">
                 {product.shortDescription}
               </p>
             )}
 
-            {/* Actions */}
             <div className="flex gap-2 mt-auto mb-6">
               <button
                 onClick={handleAddToCart}
@@ -254,10 +282,8 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) => {
               </button>
             </div>
 
-            {/* Features */}
             <div className="grid grid-cols-2 gap-3 pt-4 border-t border-[var(--color-border)]">
               {[
-                // { icon: <Truck className="h-4 w-4" />, text: "Доставка" },
                 { icon: <Shield className="h-4 w-4" />, text: "Гарантія" },
                 { icon: <Package className="h-4 w-4" />, text: "В наявності" },
               ].map((item, i) => (

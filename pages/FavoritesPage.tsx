@@ -7,6 +7,7 @@ import { addToCart } from "../redux/cartSlice";
 import { Product } from "../types";
 import { Heart, ArrowRight } from "lucide-react";
 import { useToast } from "../components/Toast";
+import TrailerLoading from "../components/TrailerLoading";
 
 const FavoritesPage: React.FC = () => {
   const dispatch = useDispatch();
@@ -16,9 +17,11 @@ const FavoritesPage: React.FC = () => {
     (state: RootState): string[] => state.favorites.ids
   );
   const allTrailers = useSelector((state: RootState) => state.trailers.list);
+  const trailersStatus = useSelector((state: RootState) => state.trailers.status);
   const allComponents = useSelector(
     (state: RootState) => state.components.list
   );
+  const componentsStatus = useSelector((state: RootState) => state.components.status);
 
   const allProducts = useMemo(() => {
     const trailers = Array.isArray(allTrailers) ? allTrailers : [];
@@ -31,9 +34,14 @@ const FavoritesPage: React.FC = () => {
     [favoriteIdsArray]
   );
 
-  const favoriteProducts = allProducts.filter((product) =>
-    favoriteIds.has(product.id)
+  const favoriteProducts = useMemo(
+    () => allProducts.filter((product) => favoriteIds.has(product.id)),
+    [allProducts, favoriteIds]
   );
+
+  const isLoading =
+    (trailersStatus === "loading" && allTrailers.length === 0) ||
+    (componentsStatus === "loading" && allComponents.length === 0);
 
   useEffect(() => {
     document.title = "Обране | ПричепМаркет";
@@ -60,6 +68,10 @@ const FavoritesPage: React.FC = () => {
     window.history.pushState({}, "", path);
     window.dispatchEvent(new Event("locationchange"));
   };
+
+  if (isLoading) {
+    return <TrailerLoading size="md" label="Завантаження..." />;
+  }
 
   if (favoriteProducts.length === 0) {
     return (

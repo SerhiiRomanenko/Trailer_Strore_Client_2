@@ -1,16 +1,16 @@
-import React, { useState, useCallback, useMemo, useEffect } from "react";
+import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Product } from "../types";
 import ProductList from "../components/TrailerList";
-import SkeletonCard from "../components/SkeletonCard";
+import TrailerLoading from "../components/TrailerLoading";
 import { addToCart } from "../redux/cartSlice";
 import { toggleFavorite } from "../redux/favoritesSlice";
 import { RootState, AppDispatch } from "../redux/store";
 import Filters from "../components/Filters";
 import { SlidersHorizontal } from "lucide-react";
-import { fetchTrailers } from "../redux/trailerSlice";
 import { useToast } from "../components/Toast";
 import { useFilterUI } from "../contexts/FilterContext";
+import { fetchTrailers } from "../redux/trailerSlice";
 
 export interface FiltersState {
   searchQuery: string;
@@ -26,6 +26,12 @@ const HomePage: React.FC = () => {
   const { success, info } = useToast();
   const { setShowFilter, setOpenCallback, setActiveFilterCount } = useFilterUI();
 
+  const {
+    list: trailers,
+    status: trailersStatus,
+    error: trailersError,
+  } = useSelector((state: RootState) => state.trailers);
+
   const favoriteIdsArray = useSelector(
     (state: RootState): string[] => state.favorites.ids
   );
@@ -33,31 +39,6 @@ const HomePage: React.FC = () => {
     () => new Set(favoriteIdsArray),
     [favoriteIdsArray]
   );
-
-  const {
-    list: trailers,
-    status: trailersStatus,
-    error: trailersError,
-  } = useSelector((state: RootState) => state.trailers);
-
-  useEffect(() => {
-    document.title = "Причепи | ПричепМаркет";
-  }, []);
-
-  // Register filter state with global context for Header
-  useEffect(() => {
-    setShowFilter(true);
-    setOpenCallback(() => setIsFiltersOpen(prev => !prev));
-    return () => {
-      setShowFilter(false);
-      setOpenCallback(null);
-    };
-  }, []);
-
-
-  useEffect(() => {
-    if (trailersStatus === "idle") dispatch(fetchTrailers());
-  }, [trailersStatus, dispatch]);
 
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [filters, setFilters] = useState<FiltersState>({
@@ -69,6 +50,31 @@ const HomePage: React.FC = () => {
     suspensionTypes: [],
   });
 
+  // Ref to avoid stale closure in the toggle callback
+  const setIsFiltersOpenRef = useRef(setIsFiltersOpen);
+  setIsFiltersOpenRef.current = setIsFiltersOpen;
+
+  // Fetch trailers data on mount (only if not already loaded)
+  useEffect(() => {
+    if (trailersStatus === "idle") dispatch(fetchTrailers());
+  }, [trailersStatus, dispatch]);
+
+  // Set page title
+  useEffect(() => {
+    document.title = "Причепи | ПричепМаркет";
+  }, []);
+
+  // Register filter state with global context for Header
+  useEffect(() => {
+    setShowFilter(true);
+    setOpenCallback(() => setIsFiltersOpenRef.current(prev => !prev));
+    return () => {
+      setShowFilter(false);
+      setOpenCallback(null);
+    };
+  }, []);
+
+  // Extract unique brands and suspension types from loaded data
   const { allBrands, allSuspensionTypes } = useMemo(() => {
     const brands = new Set<string>();
     const suspensionTypes = new Set<string>();
@@ -86,6 +92,7 @@ const HomePage: React.FC = () => {
     };
   }, [trailers]);
 
+  // Filter products based on active filters
   const filteredProducts = useMemo(() => {
     if (!Array.isArray(trailers)) return [];
     return trailers.filter((product) => {
@@ -161,10 +168,20 @@ const HomePage: React.FC = () => {
     (filters.maxPrice ? 1 : 0) +
     (filters.searchQuery ? 1 : 0);
 
-  // Sync active filter count
+  // Sync active filter count with global context
   useEffect(() => {
     setActiveFilterCount(activeFilterCount);
   }, [activeFilterCount]);
+
+  // --- Render logic ---
+  // 1. Loading and no cached data: show skeletons
+  const isLoading = trailersStatus === "loading" && trailers.length === 0;
+  // 2. Failed and no data: show error
+  const isFailed = trailersStatus === "failed" && trailers.length === 0;
+  // 3. Have data and nothing loading: show products
+  const hasProducts = trailersStatus !== "loading" && filteredProducts.length > 0;
+  // 4. Have data but filters match nothing: show empty
+  const isFilteredEmpty = trailersStatus !== "loading" && trailers.length > 0 && filteredProducts.length === 0;
 
   return (
     <div className="py-4 md:py-6">
@@ -174,7 +191,9 @@ const HomePage: React.FC = () => {
           Причепи
         </h1>
         <p className="text-sm text-[var(--color-text-tertiary)] mt-0.5">
-          {filteredProducts.length} {filteredProducts.length === 1 ? "товар" : filteredProducts.length < 5 ? "товари" : "товарів"}
+          {isLoading
+            ? "Завантаження..."
+            : `${filteredProducts.length} ${filteredProducts.length === 1 ? "товар" : filteredProducts.length < 5 ? "товари" : "товарів"}`}
         </p>
       </div>
 
@@ -233,42 +252,43 @@ const HomePage: React.FC = () => {
 
         {/* Products — second in DOM, full width on mobile */}
         <div className="flex-1 min-w-0">
-          {trailersStatus === "loading" && !filteredProducts.length ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-3">
-              {Array.from({ length: 12 }).map((_, i) => (
-                <SkeletonCard key={i} />
-              ))}
+          {isLoading ? (
+            <TrailerLoading size="lg" label="Завантаження причепів..." />
+          ) : isFailed ? (
+            /* Failed: show error with retry button */
+            <div className="text-center py-16 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]">
+              <p className="text-sm text-[var(--color-text-tertiary)]">
+                Помилка: {trailersError || "Не вдалося завантажити дані"}
+              </p>
+              <button
+                onClick={() => dispatch(fetchTrailers())}
+                className="mt-3 text-sm font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-hover)]"
+              >
+                Спробувати знову
+              </button>
             </div>
-          ) : filteredProducts.length > 0 ? (
+          ) : hasProducts ? (
+            /* Products: show list */
             <ProductList
               products={filteredProducts}
               onAddToCart={handleAddToCart}
               onToggleFavorite={handleToggleFavorite}
               favoriteIds={favoriteIds}
             />
-          ) : trailersStatus === "loading" ? null : (
+          ) : isFilteredEmpty ? (
+            /* No results from filters: show hint */
             <div className="text-center py-16 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]">
               <p className="text-sm text-[var(--color-text-tertiary)]">
-                {trailersStatus === "failed" ? `Помилка: ${trailersError}` : "Нічого не знайдено"}
+                Нічого не знайдено за обраними фільтрами
               </p>
-              {trailersStatus === "failed" && (
-                <button
-                  onClick={() => dispatch(fetchTrailers())}
-                  className="mt-3 text-sm font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-hover)]"
-                >
-                  Спробувати знову
-                </button>
-              )}
-              {trailersStatus !== "failed" && hasFilters && (
-                <button
-                  onClick={handleResetFilters}
-                  className="mt-3 text-sm font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-hover)]"
-                >
-                  Скинути фільтри
-                </button>
-              )}
+              <button
+                onClick={handleResetFilters}
+                className="mt-3 text-sm font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-hover)]"
+              >
+                Скинути фільтри
+              </button>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

@@ -6,7 +6,7 @@ import { toggleFavorite } from "../redux/favoritesSlice";
 import { fetchComponents } from "../redux/componentSlice";
 import { Product } from "../types";
 import ProductCard from "./ProductCard";
-import SkeletonCard from "./SkeletonCard";
+import TrailerLoading from "./TrailerLoading";
 import ComponentFilters, {
   ComponentFiltersState,
 } from "./ComponentFilters";
@@ -47,6 +47,10 @@ const ComponentList: React.FC = () => {
     components?.forEach((c) => { if (c.subCategory) types.add(c.subCategory); });
     return Array.from(types).sort();
   }, [components]);
+
+  useEffect(() => {
+    document.title = "Комплектуючі | ПричепМаркет";
+  }, []);
 
   useEffect(() => {
     if (status === "idle") dispatch(fetchComponents());
@@ -191,11 +195,7 @@ const ComponentList: React.FC = () => {
         {/* Product grid — second in DOM, full width on mobile */}
         <div className="flex-1 min-w-0">
           {status === "loading" && components.length === 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-3">
-              {Array.from({ length: 12 }).map((_, i) => (
-                <SkeletonCard key={i} />
-              ))}
-            </div>
+            <TrailerLoading size="lg" label="Завантаження комплектуючих..." />
           ) : status === "failed" && components.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-sm text-[var(--color-error)]">Помилка завантаження</p>

@@ -1,8 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
 import { Product } from "../types";
+import api from "../api/axiosInstance";
 
-const API_BASE_URL = import.meta.env.VITE_BASE_API_URL || "https://trailer-strore-server.onrender.com";
 export interface OrderItem extends Product {
   quantity: number;
 }
@@ -40,6 +39,7 @@ interface OrdersState {
   list: Order[];
   currentOrder: Order | null;
   status: "idle" | "loading" | "succeeded" | "failed";
+  detailStatus: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
 }
 
@@ -56,6 +56,7 @@ const initialState: OrdersState = {
   list: cachedOrders,
   currentOrder: null,
   status: cachedOrders.length > 0 ? "succeeded" : "idle",
+  detailStatus: "idle",
   error: null,
 };
 
@@ -64,25 +65,24 @@ export const fetchAllOrders = createAsyncThunk<
   void,
   { rejectValue: string }
 >("orders/fetchAllOrders", async (_, { rejectWithValue }) => {
-  try {
-    const token = localStorage.getItem("authToken");
-    const maxRetries = 2;
-    for (let i = 0; i <= maxRetries; i++) {
-      try {
-        const response = await axios.get(`${API_BASE_URL}/api/orders`, {
-          headers: { Authorization: `Bearer ${token}` },
-          timeout: 30000,
-        });
-        return response.data;
-      } catch (error: any) {
-        if (i === maxRetries) throw error;
+  const maxRetries = 2;
+  let lastError: any;
+
+  for (let i = 0; i <= maxRetries; i++) {
+    try {
+      const { data } = await api.get("/api/orders");
+      return data;
+    } catch (error: any) {
+      lastError = error;
+      if (i < maxRetries) {
         await new Promise((r) => setTimeout(r, 1000 * Math.pow(2, i)));
       }
     }
-    return [];
-  } catch (error: any) {
-    return rejectWithValue(error.response?.data?.message || error.message);
   }
+
+  return rejectWithValue(
+    lastError?.response?.data?.message || lastError?.message || "Не вдалося завантажити замовлення"
+  );
 });
 
 export const fetchMyOrders = createAsyncThunk<
@@ -91,58 +91,42 @@ export const fetchMyOrders = createAsyncThunk<
   { rejectValue: string }
 >("orders/fetchMyOrders", async (_, { rejectWithValue }) => {
   try {
-    const token = localStorage.getItem("authToken");
-    const response = await axios.get(`${API_BASE_URL}/api/orders/my-orders`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
+    const { data } = await api.get("/api/orders/my-orders");
+    return data;
   } catch (error: any) {
-    return rejectWithValue(error.response?.data?.message || error.message);
+    return rejectWithValue(
+      error?.response?.data?.message || error?.message || "Не вдалося завантажити мої замовлення"
+    );
   }
 });
 
-// Отримання одного замовлення за ID
 export const fetchOrderById = createAsyncThunk<
   Order,
   string,
   { rejectValue: string }
 >("orders/fetchOrderById", async (orderId, { rejectWithValue }) => {
   try {
-    const token = localStorage.getItem("authToken");
-    const response = await axios.get(`${API_BASE_URL}/api/orders/${orderId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
+    const { data } = await api.get(`/api/orders/${orderId}`);
+    return data;
   } catch (error: any) {
-    return rejectWithValue(error.response?.data?.message || error.message);
+    return rejectWithValue(
+      error?.response?.data?.message || error?.message || "Не вдалося завантажити замовлення"
+    );
   }
 });
 
-// Додавання нового замовлення
 export const addOrder = createAsyncThunk<
-  Order, // Тип повернення
+  Order,
   Omit<Order, "id" | "status" | "date" | "createdAt" | "updatedAt">,
   { rejectValue: string }
 >("orders/addOrder", async (newOrderData, { rejectWithValue }) => {
   try {
-    const token = localStorage.getItem("authToken");
-    const response = await axios.post(
-      `${API_BASE_URL}/api/orders`,
-      newOrderData,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    return response.data;
+    const { data } = await api.post("/api/orders", newOrderData);
+    return data;
   } catch (error: any) {
-    return rejectWithValue(error.response?.data?.message || error.message);
+    return rejectWithValue(
+      error?.response?.data?.message || error?.message || "Не вдалося створити замовлення"
+    );
   }
 });
 
@@ -150,44 +134,29 @@ export const updateOrderStatus = createAsyncThunk<
   Order,
   { orderId: string; status: OrderStatus },
   { rejectValue: string }
->(
-  "orders/updateOrderStatus",
-  async ({ orderId, status }, { rejectWithValue }) => {
-    try {
-      const token = localStorage.getItem("authToken");
-      const response = await axios.put(
-        `${API_BASE_URL}/api/orders/${orderId}/status`,
-        { status },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || error.message);
-    }
+>("orders/updateOrderStatus", async ({ orderId, status }, { rejectWithValue }) => {
+  try {
+    const { data } = await api.put(`/api/orders/${orderId}/status`, { status });
+    return data;
+  } catch (error: any) {
+    return rejectWithValue(
+      error?.response?.data?.message || error?.message || "Не вдалося оновити статус"
+    );
   }
-);
+});
 
-// Видалення замовлення
 export const deleteOrder = createAsyncThunk<
   string,
   string,
   { rejectValue: string }
 >("orders/deleteOrder", async (orderId, { rejectWithValue }) => {
   try {
-    const token = localStorage.getItem("authToken");
-    await axios.delete(`${API_BASE_URL}/api/orders/${orderId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    await api.delete(`/api/orders/${orderId}`);
     return orderId;
   } catch (error: any) {
-    return rejectWithValue(error.response?.data?.message || error.message);
+    return rejectWithValue(
+      error?.response?.data?.message || error?.message || "Не вдалося видалити замовлення"
+    );
   }
 });
 
@@ -197,6 +166,7 @@ const ordersSlice = createSlice({
   reducers: {
     clearCurrentOrder(state) {
       state.currentOrder = null;
+      state.detailStatus = "idle";
     },
   },
   extraReducers: (builder) => {
@@ -211,9 +181,9 @@ const ordersSlice = createSlice({
       })
       .addCase(fetchAllOrders.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.payload || "Failed to fetch orders";
+        state.error = action.payload || "Не вдалося завантажити замовлення";
       })
-      // fetchMyOrders
+      // fetchMyOrders — uses same status (list-level)
       .addCase(fetchMyOrders.pending, (state) => {
         state.status = "loading";
       })
@@ -223,20 +193,20 @@ const ordersSlice = createSlice({
       })
       .addCase(fetchMyOrders.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.payload || "Failed to fetch my orders";
+        state.error = action.payload || "Не вдалося завантажити мої замовлення";
       })
-      // fetchOrderById
+      // fetchOrderById — uses detailStatus (independent of list)
       .addCase(fetchOrderById.pending, (state) => {
-        state.status = "loading";
-        state.currentOrder = null;
+        state.detailStatus = "loading";
+        state.error = null;
       })
       .addCase(fetchOrderById.fulfilled, (state, action) => {
-        state.status = "succeeded";
+        state.detailStatus = "succeeded";
         state.currentOrder = action.payload;
       })
       .addCase(fetchOrderById.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.payload || "Failed to fetch order by ID";
+        state.detailStatus = "failed";
+        state.error = action.payload || "Не вдалося завантажити замовлення";
         state.currentOrder = null;
       })
       // addOrder
@@ -247,14 +217,12 @@ const ordersSlice = createSlice({
         state.status = "succeeded";
       })
       .addCase(addOrder.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.payload || "Failed to add order";
+        state.error = action.payload || "Не вдалося створити замовлення";
       })
       // updateOrderStatus
       .addCase(updateOrderStatus.fulfilled, (state, action) => {
         const index = state.list.findIndex((o) => o.id === action.payload.id);
         if (index !== -1) {
-          // Preserve original items and details, only update status
           state.list[index] = {
             ...state.list[index],
             status: action.payload.status,
@@ -264,8 +232,7 @@ const ordersSlice = createSlice({
         state.status = "succeeded";
       })
       .addCase(updateOrderStatus.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.payload || "Failed to update order status";
+        state.error = action.payload || "Не вдалося оновити статус замовлення";
       })
       // deleteOrder
       .addCase(deleteOrder.fulfilled, (state, action) => {
@@ -273,8 +240,7 @@ const ordersSlice = createSlice({
         state.status = "succeeded";
       })
       .addCase(deleteOrder.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.payload || "Failed to delete order";
+        state.error = action.payload || "Не вдалося видалити замовлення";
       });
   },
 });

@@ -3,12 +3,29 @@ import React, {
   useState,
   useContext,
   useEffect,
+  useRef,
   ReactNode,
   useCallback,
 } from "react";
 import { User } from "../types";
 
 const API_BASE_URL = import.meta.env.VITE_BASE_API_URL || "https://trailer-strore-server.onrender.com";
+const AUTH_REQUEST_TIMEOUT = 60000;
+
+// Helper: fetch with timeout
+async function fetchWithTimeout(
+  url: string,
+  options: RequestInit = {},
+  timeout = AUTH_REQUEST_TIMEOUT
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeout);
+  try {
+    return await fetchWithTimeout(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 interface ProfileUpdateData {
   name?: string;
@@ -58,12 +75,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [users, setUsers] = useState<User[]>([]);
   const [authMessage, setAuthMessage] = useState<AuthMessage | null>(null);
+  const authAbortRef = useRef<AbortController | null>(null);
 
   const fetchCurrentUser = useCallback(async (authToken: string) => {
+    // Cancel any in-flight auth request
+    authAbortRef.current?.abort();
+    const controller = new AbortController();
+    authAbortRef.current = controller;
+
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+      const timer = setTimeout(() => controller.abort(), AUTH_REQUEST_TIMEOUT);
+      const response = await fetchWithTimeout(`${API_BASE_URL}/api/auth/me`, {
         headers: { Authorization: `Bearer ${authToken}` },
+        signal: controller.signal,
       });
+      clearTimeout(timer);
       if (response.ok) {
         const user = await response.json();
         setCurrentUser(user);
@@ -131,7 +157,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const register = useCallback(
     async (name: string, email: string, password: string): Promise<boolean> => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+        const response = await fetchWithTimeout(`${API_BASE_URL}/api/auth/register`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name, email, password }),
@@ -165,7 +191,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const login = useCallback(
     async (email: string, password: string): Promise<boolean> => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        const response = await fetchWithTimeout(`${API_BASE_URL}/api/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
@@ -209,7 +235,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         };
       }
       try {
-        const response = await fetch(`${API_BASE_URL}/api/auth/me/profile`, {
+        const response = await fetchWithTimeout(`${API_BASE_URL}/api/auth/me/profile`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -287,7 +313,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         };
       }
       try {
-        const response = await fetch(`${API_BASE_URL}/api/auth/me/password`, {
+        const response = await fetchWithTimeout(`${API_BASE_URL}/api/auth/me/password`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -358,7 +384,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const forgotPassword = useCallback(
     async (email: string) => {
       try {
-        const response = await fetch(
+        const response = await fetchWithTimeout(
           `${API_BASE_URL}/api/auth/forgot-password`,
           {
             method: "POST",
@@ -402,7 +428,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       return;
     }
     try {
-      const response = await fetch(`${API_BASE_URL}/api/users`, {
+      const response = await fetchWithTimeout(`${API_BASE_URL}/api/users`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.ok) {
@@ -438,7 +464,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         return false;
       }
       try {
-        const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
+        const response = await fetchWithTimeout(`${API_BASE_URL}/api/users/${userId}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -496,7 +522,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         return false;
       }
       try {
-        const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
+        const response = await fetchWithTimeout(`${API_BASE_URL}/api/users/${userId}`, {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
         });

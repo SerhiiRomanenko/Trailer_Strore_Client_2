@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../redux/store";
 import { useAuth } from "../contexts/AuthContext";
@@ -7,9 +7,10 @@ import {
   updateOrderStatus,
   OrderStatus,
 } from "../redux/ordersSlice";
-import { Loader2, X, ChevronDown, ChevronUp, Package, Copy } from "lucide-react";
+import { ChevronDown, ChevronUp, Package, Copy } from "lucide-react";
 import { useToast } from "../components/Toast";
 import Modal from "../components/Modal";
+import TrailerLoading from "../components/TrailerLoading";
 
 const statusLabels: Record<OrderStatus, string> = {
   Processing: "Обробка",
@@ -34,6 +35,7 @@ const MyOrdersPage: React.FC = () => {
   );
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
 
   const navigate = (path: string) => {
     window.history.pushState({}, "", path);
@@ -55,16 +57,18 @@ const MyOrdersPage: React.FC = () => {
     [userOrders]
   );
 
-  const handleCancelOrder = async (orderId: string) => {
+  const handleCancelOrder = useCallback(async (orderId: string) => {
     if (!confirm("Скасувати замовлення?")) return;
+    setCancellingId(orderId);
     try {
       await dispatch(updateOrderStatus({ orderId, status: "Cancelled" })).unwrap();
-      await dispatch(fetchMyOrders());
       success("Замовлення скасовано");
     } catch {
       showError("Не вдалося скасувати замовлення");
+    } finally {
+      setCancellingId(null);
     }
-  };
+  }, [dispatch, success, showError]);
 
   const copyOrderId = (id: string) => {
     navigator.clipboard.writeText(id);
@@ -72,12 +76,7 @@ const MyOrdersPage: React.FC = () => {
   };
 
   if (authLoading || orderStatus === "loading") {
-    return (
-      <div className="flex items-center justify-center py-20 gap-3">
-        <Loader2 className="h-5 w-5 text-[var(--color-primary)] animate-spin" />
-        <span className="text-sm text-[var(--color-text-secondary)]">Завантаження...</span>
-      </div>
-    );
+    return <TrailerLoading label="Завантаження..." />;
   }
 
   if (!currentUser) return null;
@@ -195,9 +194,10 @@ const MyOrdersPage: React.FC = () => {
                     {order.status === "Processing" && (
                       <button
                         onClick={() => handleCancelOrder(order.id)}
-                        className="text-xs font-medium text-red-500 hover:text-red-600"
+                        disabled={cancellingId === order.id}
+                        className="text-xs font-medium text-red-500 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        Скасувати
+                        {cancellingId === order.id ? "Скасовуємо..." : "Скасувати"}
                       </button>
                     )}
                   </div>

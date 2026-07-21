@@ -1,5 +1,5 @@
-import React, { useCallback } from "react";
-import { ShoppingCart, Star } from "lucide-react";
+import React, { useCallback, useRef, useEffect } from "react";
+import { ShoppingCart, Star, X } from "lucide-react";
 import { Product } from "../types";
 
 interface ProductCardProps {
@@ -15,6 +15,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
   onToggleFavorite,
   isFavorite,
 }) => {
+  // Keep product in a ref to avoid stale closure in the callback
+  const productRef = useRef(product);
+  useEffect(() => { productRef.current = product; }, [product]);
+
   const detailPath =
     product.category === "Причепи"
       ? `/product/${product.slug}`
@@ -42,15 +46,19 @@ const ProductCard: React.FC<ProductCardProps> = ({
     (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      onAddToCart(product);
+      onAddToCart(productRef.current);
     },
-    [onAddToCart, product]
+    [onAddToCart]
   );
 
   const isOutOfStock = !product.inStock;
 
   return (
-    <div className="group bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] overflow-hidden transition-all duration-200 hover:shadow-[var(--shadow-md)] hover:border-[var(--color-border-hover)] hover:-translate-y-0.5">
+    <div className={`group bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] overflow-hidden transition-all duration-200 hover:shadow-[var(--shadow-md)] hover:border-[var(--color-border-hover)] ${
+      isOutOfStock
+        ? "opacity-70 hover:opacity-80 hover:translate-y-0"
+        : "hover:-translate-y-0.5"
+    }`}>
       {/* Image */}
       <div className="relative overflow-hidden bg-[var(--color-bg)]">
         <a href={detailPath} onClick={handleNav} className="block">
@@ -60,11 +68,20 @@ const ProductCard: React.FC<ProductCardProps> = ({
               "https://via.placeholder.com/300/eef0f2/999?text=--"
             }
             alt={product.name}
-            className="w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className={`w-full object-cover transition-all duration-500 ${
+              isOutOfStock
+                ? "grayscale brightness-75 group-hover:grayscale-0 group-hover:brightness-90"
+                : "group-hover:scale-105"
+            }`}
             style={{ aspectRatio: "1" }}
             loading="lazy"
           />
         </a>
+
+        {/* Out-of-stock overlay */}
+        {isOutOfStock && (
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+        )}
 
         {/* Favorite button */}
         <button
@@ -84,7 +101,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Out of stock badge */}
         {isOutOfStock && (
-          <span className="absolute top-2 left-2 text-[10px] font-semibold text-white bg-black/60 px-2 py-0.5 rounded-md backdrop-blur-sm">
+          <span className="absolute top-2 left-2 flex items-center gap-1 text-[10px] font-semibold text-white bg-red-500/90 px-2 py-0.5 rounded-md backdrop-blur-sm">
+            <svg className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+            </svg>
             Немає
           </span>
         )}
