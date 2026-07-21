@@ -70,6 +70,9 @@ const ContactsPage: React.FC = () => {
             <div className="space-y-4">
               <ContactCard icon={<MapPin className="h-4 w-4" />} title="Адреса">
                 <p>Київська обл., смт. Ворзель, вул. Яблунська, 11</p>
+                <p className="text-xs text-[var(--color-text-tertiary)] mt-1">
+                  Приїзд, будь ласка, узгоджуйте заздалегідь телефоном — я не завжди на місці.
+                </p>
               </ContactCard>
               <ContactCard icon={<Phone className="h-4 w-4" />} title="Телефон">
                 <a href="tel:+380679372731" className="text-[var(--color-link)] hover:underline">

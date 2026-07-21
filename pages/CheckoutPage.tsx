@@ -6,6 +6,7 @@ import { addOrder } from "../redux/ordersSlice";
 import { clearCart } from "../redux/cartSlice";
 import { ArrowLeft } from "lucide-react";
 import { useToast } from "../components/Toast";
+import emailjs from "emailjs-com";
 
 import Stepper from "../components/checkout/Stepper";
 import CustomerInfoStep from "../components/checkout/CustomerInfoStep";
