@@ -7,6 +7,7 @@ import { clearCart } from "../redux/cartSlice";
 import { ArrowLeft } from "lucide-react";
 import { useToast } from "../components/Toast";
 import emailjs from "emailjs-com";
+import { setMeta, SITE_URL } from "../utils/seo";
 
 import Stepper from "../components/checkout/Stepper";
 import CustomerInfoStep from "../components/checkout/CustomerInfoStep";
@@ -57,7 +58,10 @@ const CheckoutPage: React.FC = () => {
   });
 
   useEffect(() => {
-    document.title = "Оформлення замовлення | ПричепМаркет";
+    const title = "Оформлення замовлення | ПричепМаркет";
+    const desc = "Оформіть замовлення на придбання причепів: вкажіть контактні дані, виберіть доставку та спосіб оплати.";
+    const canonical = `${SITE_URL}/checkout`;
+    setMeta({ title, description: desc, canonical, noindex: true });
   }, []);
 
   const navigate = (path: string) => {

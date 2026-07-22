@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { Eye, EyeOff, Loader2, User } from "lucide-react";
 import { useToast } from "../components/Toast";
+import { setMeta, SITE_URL } from "../utils/seo";
 
 const MyProfilePage: React.FC = () => {
   const {
@@ -30,6 +31,13 @@ const MyProfilePage: React.FC = () => {
     setName(currentUser?.name || "");
     setEmail(currentUser?.email || "");
   }, [currentUser, authLoading]);
+
+  useEffect(() => {
+    const title = "Мій профіль | ПричепМаркет";
+    const desc = "Управління особистим профілем: зміна імені, email, пароля та інших налаштувань акаунту.";
+    const canonical = `${SITE_URL}/my-profile`;
+    setMeta({ title, description: desc, canonical, noindex: true });
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

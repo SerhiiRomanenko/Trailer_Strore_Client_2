@@ -1,8 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { setMeta, SITE_URL } from "../utils/seo";
 
 const RegisterPage: React.FC = () => {
+  useEffect(() => {
+    const title = "Реєстрація | ПричепМаркет";
+    const desc = "Створіть акаунт на ПричепМаркет для швидкого оформлення замовлень та відстеження покупок.";
+    const canonical = `${SITE_URL}/register`;
+    setMeta({ title, description: desc, canonical, noindex: true });
+  }, []);
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

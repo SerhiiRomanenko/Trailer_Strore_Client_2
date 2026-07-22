@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useToast } from "../components/Toast";
 import TrailerLoading from "../components/TrailerLoading";
+import { setMeta, setJsonLd, removeJsonLd, productSchema, breadcrumbSchema, SITE_URL } from "../utils/seo";
 
 interface ProductDetailPageProps {
   slug: string;
@@ -81,10 +82,44 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) => {
   // SEO metadata
   useEffect(() => {
     if (product) {
-      document.title = product.metaTitle || `${product.name} | ПричепМаркет`;
-      const descTag = document.querySelector('meta[name="description"]');
-      if (descTag) descTag.setAttribute("content", product.metaDescription);
+      const title = product.metaTitle || `${product.name} | ПричепМаркет`;
+      const desc = product.metaDescription || product.shortDescription || `${product.name} — купити в ПричепМаркет`;
+      const canonical = `${SITE_URL}/product/${product.slug}`;
+      const ogImage = product.images?.[0] || "";
+
+      setMeta({ title, description: desc, canonical, ogImage: ogImage || undefined });
+
+      // Product JSON-LD
+      setJsonLd(
+        productSchema({
+          name: product.name,
+          image: product.images?.[0] || "",
+          description: desc,
+          brand: product.brand,
+          sku: product.sku,
+          price: product.price,
+          currency: product.currency,
+          inStock: product.inStock,
+          slug: product.slug,
+        }),
+        "product-schema"
+      );
+
+      // Breadcrumb JSON-LD
+      setJsonLd(
+        breadcrumbSchema([
+          { name: "Головна", item: SITE_URL },
+          { name: "Причепи", item: `${SITE_URL}/` },
+          { name: product.name },
+        ]),
+        "breadcrumb-schema"
+      );
     }
+
+    return () => {
+      removeJsonLd("product-schema");
+      removeJsonLd("breadcrumb-schema");
+    };
   }, [product]);
 
   const handleAddToCart = useCallback(() => {
@@ -145,13 +180,31 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) => {
   return (
     <div className="py-4 md:py-6">
       {/* Breadcrumb */}
-      <button
-        onClick={() => navigate("/")}
-        className="flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)] hover:text-[var(--color-primary)] transition-colors mb-4"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        Назад до каталогу
-      </button>
+      <nav aria-label="Навігаційна стежка" className="mb-4">
+        <ol className="flex items-center gap-1.5 text-xs">
+          <li>
+            <button
+              onClick={() => navigate("/")}
+              className="text-[var(--color-text-tertiary)] hover:text-[var(--color-primary)] transition-colors"
+            >
+              Головна
+            </button>
+          </li>
+          <li className="text-[var(--color-text-tertiary)]">/</li>
+          <li>
+            <button
+              onClick={() => navigate("/")}
+              className="text-[var(--color-text-tertiary)] hover:text-[var(--color-primary)] transition-colors"
+            >
+              Причепи
+            </button>
+          </li>
+          <li className="text-[var(--color-text-tertiary)]">/</li>
+          <li className="text-[var(--color-text-secondary)]" aria-current="page">
+            {product.name}
+          </li>
+        </ol>
+      </nav>
 
       <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] overflow-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
@@ -163,6 +216,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ slug }) => {
                 alt={product.name}
                 className="w-full object-cover"
                 style={{ aspectRatio: "4/3" }}
+                fetchPriority="high"
               />
               {product.images.length > 1 && (
                 <>

@@ -353,6 +353,7 @@ function NavLink({
     <a
       href={path}
       onClick={(e) => onClick(e, path)}
+      aria-current={isActive ? "page" : undefined}
       className={`text-[13px] font-medium px-3.5 py-2 rounded-lg transition-colors cursor-pointer whitespace-nowrap ${
         isActive
           ? "text-[var(--color-primary)] bg-[var(--color-primary)]/10 font-semibold"

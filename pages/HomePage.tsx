@@ -11,6 +11,7 @@ import { SlidersHorizontal } from "lucide-react";
 import { useToast } from "../components/Toast";
 import { useFilterUI } from "../contexts/FilterContext";
 import { fetchTrailers } from "../redux/trailerSlice";
+import { setMeta, setJsonLd, removeJsonLd, organizationSchema, websiteSchema, SITE_URL } from "../utils/seo";
 
 export interface FiltersState {
   searchQuery: string;
@@ -61,7 +62,20 @@ const HomePage: React.FC = () => {
 
   // Set page title
   useEffect(() => {
-    document.title = "Причепи | ПричепМаркет";
+    const title = "Причепи | ПричепМаркет";
+    const desc = "Великий вибір легкових причепів від провідних виробників: Кремень, PRAGMATEC, Лідер. Купуйте надійні причепи з доставкою по всій Україні.";
+    const canonical = SITE_URL;
+
+    setMeta({ title, description: desc, canonical });
+
+    // Organization + WebSite JSON-LD
+    setJsonLd(organizationSchema(), "org-schema");
+    setJsonLd(websiteSchema(), "website-schema");
+
+    return () => {
+      removeJsonLd("org-schema");
+      removeJsonLd("website-schema");
+    };
   }, []);
 
   // Register filter state with global context for Header

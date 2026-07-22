@@ -11,6 +11,7 @@ import { ChevronDown, ChevronUp, Package, Copy } from "lucide-react";
 import { useToast } from "../components/Toast";
 import Modal from "../components/Modal";
 import TrailerLoading from "../components/TrailerLoading";
+import { setMeta, SITE_URL } from "../utils/seo";
 
 const statusLabels: Record<OrderStatus, string> = {
   Processing: "Очікування",
@@ -53,6 +54,13 @@ const MyOrdersPage: React.FC = () => {
       dispatch(fetchMyOrders());
     }
   }, [currentUser, dispatch]);
+
+  useEffect(() => {
+    const title = "Мої замовлення | ПричепМаркет";
+    const desc = "Переглядайте статус та історію своїх замовлень, скасовуйте очікувані замовлення.";
+    const canonical = `${SITE_URL}/my-orders`;
+    setMeta({ title, description: desc, canonical, noindex: true });
+  }, []);
 
   const sortedOrders = useMemo(
     () => [...userOrders].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),

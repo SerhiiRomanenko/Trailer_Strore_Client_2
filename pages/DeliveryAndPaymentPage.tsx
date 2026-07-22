@@ -1,16 +1,13 @@
 import React, { useEffect } from "react";
 import { CreditCard, Banknote, Building2, Truck, MapPin, Clock } from "lucide-react";
+import { setMeta, SITE_URL } from "../utils/seo";
 
 const DeliveryAndPaymentPage: React.FC = () => {
   useEffect(() => {
-    document.title = "Доставка і оплата | ПричепМаркет";
-    const descTag = document.querySelector('meta[name="description"]');
-    if (descTag) {
-      descTag.setAttribute(
-        "content",
-        "Дізнайтесь про умови доставки та доступні способи оплати причепів в нашому магазині."
-      );
-    }
+    const title = "Доставка і оплата | ПричепМаркет";
+    const desc = "Дізнайтесь про умови доставки Новою Поштою, самовивіз, та доступні способи оплати причепів: готівка, картка, безготівковий розрахунок.";
+    const canonical = `${SITE_URL}/delivery-and-payment`;
+    setMeta({ title, description: desc, canonical });
   }, []);
 
   const InfoCard = ({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) => (

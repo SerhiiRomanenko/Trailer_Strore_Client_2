@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { MapPin, Phone, Mail, Clock, Send } from "lucide-react";
 import { useToast } from "../components/Toast";
 import emailjs from "emailjs-com";
+import { setMeta, SITE_URL } from "../utils/seo";
 
 const ContactsPage: React.FC = () => {
   const { success, error: showError } = useToast();
@@ -13,7 +14,11 @@ const ContactsPage: React.FC = () => {
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
-    document.title = "Контакти | ПричепМаркет";
+    const title = "Контакти | ПричепМаркет";
+    const desc = "Зв'яжіться з нами телефоном, email або через форму на сайті. Наші контакти: смт. Ворзель, вул. Яблунська, 11, Київська обл.";
+    const canonical = `${SITE_URL}/contacts`;
+
+    setMeta({ title, description: desc, canonical });
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {

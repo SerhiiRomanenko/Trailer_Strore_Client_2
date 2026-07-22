@@ -12,6 +12,7 @@ import ComponentFilters, {
 } from "./ComponentFilters";
 import { SlidersHorizontal } from "lucide-react";
 import { useToast } from "./Toast";
+import { setMeta, SITE_URL } from "../utils/seo";
 
 const ComponentList: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -49,7 +50,10 @@ const ComponentList: React.FC = () => {
   }, [components]);
 
   useEffect(() => {
-    document.title = "Комплектуючі | ПричепМаркет";
+    const title = "Комплектуючі для причепів | ПричепМаркет";
+    const desc = "Каталог комплектуючих для причепів: вузли, гальма, підвіски, електрика, аксесуари та інше.";
+    const canonical = `${SITE_URL}/components`;
+    setMeta({ title, description: desc, canonical });
   }, []);
 
   useEffect(() => {

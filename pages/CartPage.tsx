@@ -3,13 +3,17 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../redux/store";
 import { removeFromCart, increaseQuantity, decreaseQuantity } from "../redux/cartSlice";
 import { ShoppingCart, Trash2, Minus, Plus, ArrowRight } from "lucide-react";
+import { setMeta, SITE_URL } from "../utils/seo";
 
 const CartPage: React.FC = () => {
   const dispatch = useDispatch();
   const cartItems = useSelector((state: RootState) => state.cart.items);
 
   useEffect(() => {
-    document.title = "Кошик | ПричепМаркет";
+    const title = "Кошик | ПричепМаркет";
+    const desc = "Перегляньте товари у кошику, змініть кількість та перейдіть до оформлення замовлення.";
+    const canonical = `${SITE_URL}/cart`;
+    setMeta({ title, description: desc, canonical });
   }, []);
 
   const totalPrice = cartItems.reduce(
@@ -65,6 +69,7 @@ const CartPage: React.FC = () => {
                   src={item.images?.[0] || "https://via.placeholder.com/100/f5f5f7/999?text=--"}
                   alt={item.name}
                   className="w-20 h-20 md:w-24 md:h-24 object-cover rounded-md bg-[var(--color-bg)] flex-shrink-0"
+                  loading="lazy"
                 />
 
                 {/* Info */}

@@ -1,9 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import Modal from "../components/Modal";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { setMeta, SITE_URL } from "../utils/seo";
 
 const LoginPage: React.FC = () => {
+  useEffect(() => {
+    const title = "Увійти | ПричепМаркет";
+    const desc = "Увійдіть у свій акаунт для доступу до особистого кабінету, історії замовлень та оформлення покупок.";
+    const canonical = `${SITE_URL}/login`;
+    setMeta({ title, description: desc, canonical, noindex: true });
+  }, []);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);

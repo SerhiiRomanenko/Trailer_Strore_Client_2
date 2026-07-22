@@ -54,7 +54,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   const isOutOfStock = !product.inStock;
 
   return (
-    <div className={`group bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] overflow-hidden transition-all duration-200 hover:shadow-[var(--shadow-md)] hover:border-[var(--color-border-hover)] ${
+    <article className={`group bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] overflow-hidden transition-all duration-200 hover:shadow-[var(--shadow-md)] hover:border-[var(--color-border-hover)] ${
       isOutOfStock
         ? "opacity-70 hover:opacity-80 hover:translate-y-0"
         : "hover:-translate-y-0.5"
@@ -131,16 +131,18 @@ const ProductCard: React.FC<ProductCardProps> = ({
         )}
 
         {/* Name */}
-        <a
-          href={detailPath}
-          onClick={handleNav}
-          className="block text-[13px] text-[var(--color-link)] hover:text-[var(--color-link-hover)] leading-snug line-clamp-2 mb-2 transition-colors break-words min-h-[2.5rem]"
-        >
-          {product.name}
-        </a>
+        <h3>
+          <a
+            href={detailPath}
+            onClick={handleNav}
+            className="block text-[13px] text-[var(--color-link)] hover:text-[var(--color-link-hover)] leading-snug line-clamp-2 mb-2 transition-colors break-words min-h-[2.5rem]"
+          >
+            {product.name}
+          </a>
+        </h3>
 
         {/* Price */}
-        <div className="flex items-baseline gap-1 mb-2.5">
+        <div className="flex items-baseline gap-1 mb-2.5" role="pricelist">
           <span className="text-[15px] font-bold text-[var(--color-text)]">
             {product.price?.toLocaleString("uk-UA")}
           </span>
@@ -164,7 +166,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           {isOutOfStock ? "Немає" : "В кошик"}
         </button>
       </div>
-    </div>
+    </article>
   );
 };
 

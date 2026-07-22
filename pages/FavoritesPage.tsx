@@ -8,6 +8,7 @@ import { Product } from "../types";
 import { Heart, ArrowRight } from "lucide-react";
 import { useToast } from "../components/Toast";
 import TrailerLoading from "../components/TrailerLoading";
+import { setMeta, SITE_URL } from "../utils/seo";
 
 const FavoritesPage: React.FC = () => {
   const dispatch = useDispatch();
@@ -44,7 +45,10 @@ const FavoritesPage: React.FC = () => {
     (componentsStatus === "loading" && allComponents.length === 0);
 
   useEffect(() => {
-    document.title = "Обране | ПричепМаркет";
+    const title = "Обране | ПричепМаркет";
+    const desc = "Переглядайте та управляйте своєю колекцією обраних товарів: причепів та комплектуючих.";
+    const canonical = `${SITE_URL}/favorites`;
+    setMeta({ title, description: desc, canonical });
   }, []);
 
   const handleToggleFavorite = useCallback(

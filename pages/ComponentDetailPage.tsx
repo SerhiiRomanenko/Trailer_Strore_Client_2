@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useToast } from "../components/Toast";
 import TrailerLoading from "../components/TrailerLoading";
+import { setMeta, setJsonLd, removeJsonLd, productSchema, breadcrumbSchema, SITE_URL } from "../utils/seo";
 
 interface ComponentDetailPageProps {
   id?: string;
@@ -79,22 +80,44 @@ const ComponentDetailPage: React.FC<ComponentDetailPageProps> = ({ id }) => {
 
   useEffect(() => {
     if (isLoaded && component) {
-      document.title =
-        component.metaTitle || `${component.name} | ПричепМаркет`;
+      const title = component.metaTitle || `${component.name} | ПричепМаркет`;
+      const desc = component.metaDescription || component.shortDescription || `${component.name} — комплектуюча для причепів`;
+      const canonical = `${SITE_URL}/details/${component.id}`;
+      const ogImage = component.images?.[0] || "";
 
-      let descTag = document.querySelector('meta[name="description"]');
-      if (!descTag) {
-        descTag = document.createElement("meta");
-        descTag.setAttribute("name", "description");
-        document.head.appendChild(descTag);
-      }
-      descTag.setAttribute(
-        "content",
-        component.metaDescription ||
-          component.shortDescription ||
-          `Деталі комплектуючої ${component.name}.`
+      setMeta({ title, description: desc, canonical, ogImage: ogImage || undefined });
+
+      // Product JSON-LD
+      setJsonLd(
+        productSchema({
+          name: component.name,
+          image: component.images?.[0] || "",
+          description: desc,
+          brand: component.brand,
+          sku: component.sku,
+          price: component.price,
+          currency: component.currency,
+          inStock: component.inStock,
+          slug: component.id,
+        }),
+        "component-schema"
+      );
+
+      // Breadcrumb JSON-LD
+      setJsonLd(
+        breadcrumbSchema([
+          { name: "Головна", item: SITE_URL },
+          { name: "Комплектуючі", item: `${SITE_URL}/details` },
+          { name: component.name },
+        ]),
+        "breadcrumb-schema"
       );
     }
+
+    return () => {
+      removeJsonLd("component-schema");
+      removeJsonLd("breadcrumb-schema");
+    };
   }, [isLoaded, component]);
 
   const handleAddToCart = useCallback(() => {
@@ -189,13 +212,31 @@ const ComponentDetailPage: React.FC<ComponentDetailPageProps> = ({ id }) => {
   return (
     <div className="py-4 md:py-6">
       {/* Breadcrumb */}
-      <button
-        onClick={() => navigate("/details")}
-        className="flex items-center gap-1.5 text-xs text-[var(--color-text-tertiary)] hover:text-[var(--color-primary)] transition-colors mb-4"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        Назад до каталогу
-      </button>
+      <nav aria-label="Навігаційна стежка" className="mb-4">
+        <ol className="flex items-center gap-1.5 text-xs">
+          <li>
+            <button
+              onClick={() => navigate("/")}
+              className="text-[var(--color-text-tertiary)] hover:text-[var(--color-primary)] transition-colors"
+            >
+              Головна
+            </button>
+          </li>
+          <li className="text-[var(--color-text-tertiary)]">/</li>
+          <li>
+            <button
+              onClick={() => navigate("/details")}
+              className="text-[var(--color-text-tertiary)] hover:text-[var(--color-primary)] transition-colors"
+            >
+              Комплектуючі
+            </button>
+          </li>
+          <li className="text-[var(--color-text-tertiary)]">/</li>
+          <li className="text-[var(--color-text-secondary)]" aria-current="page">
+            {component.name}
+          </li>
+        </ol>
+      </nav>
 
       <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] overflow-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
@@ -207,7 +248,7 @@ const ComponentDetailPage: React.FC<ComponentDetailPageProps> = ({ id }) => {
                 alt={component.name}
                 className="w-full object-cover"
                 style={{ aspectRatio: "4/3" }}
-                loading="lazy"
+                fetchPriority="high"
               />
               {imagesToShow.length > 1 && (
                 <>

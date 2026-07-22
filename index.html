@@ -10,6 +10,10 @@
     </script>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/x-icon" href="/favicon_transparent.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="google-site-verification" content="JEm_PC2WYVZInSZhQxl9oPc43_GdEwENX06h28IPm-g" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ПричіпМаркет | Магазин легкових причепів в Україні</title>
@@ -24,11 +28,29 @@
     <meta name="theme-color" content="#f5f5f7" />
     <meta name="color-scheme" content="light dark" />
 
+    <!-- Canonical -->
+    <link rel="canonical" href="https://trailer-strore-client-3.vercel.app/" />
+
+    <!-- Hreflang -->
+    <link rel="alternate" hreflang="uk" href="https://trailer-strore-client-3.vercel.app/" />
+    <link rel="alternate" hreflang="x-default" href="https://trailer-strore-client-3.vercel.app/" />
+
     <!-- Open Graph -->
     <meta property="og:title" content="ПричіпМаркет — Магазин легкових причепів" />
     <meta property="og:description" content="Великий вибір легкових причепів від провідних виробників з доставкою по всій Україні." />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://trailer-strore-client-3.vercel.app/" />
+    <meta property="og:image" content="https://trailer-strore-client-3.vercel.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="ПричепМаркет" />
     <meta property="og:locale" content="uk_UA" />
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="ПричепМаркет — Магазин легкових причепів" />
+    <meta name="twitter:description" content="Великий вибір легкових причепів від провідних виробників з доставкою по всій Україні." />
+    <meta name="twitter:image" content="https://trailer-strore-client-3.vercel.app/og-image.png" />
 
     <!-- Preconnect for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -36,6 +58,8 @@
     <link rel="dns-prefetch" href="//trailer-strore-server.onrender.com" />
     <link rel="dns-prefetch" href="//api.novaposhta.ua" />
 
+    <!-- Preload font -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
@@ -67,6 +91,9 @@
     </style>
   </head>
   <body>
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[200] focus:bg-[var(--color-primary)] focus:text-white focus:px-4 focus:py-2 focus:rounded-lg">
+      Перейти до основного вмісту
+    </a>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>

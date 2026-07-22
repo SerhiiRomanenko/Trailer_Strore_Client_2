@@ -108,6 +108,7 @@ const AppContent: React.FC = () => {
     <div className="flex flex-col min-h-screen bg-[var(--color-bg)]">
       {!isAdminPage && <Header route={route} showFilter={showFilter} onOpenFilters={onOpenFilters || undefined} activeFilterCount={activeFilterCount} />}
       <main
+        id="main-content"
         className={`flex-grow ${
           !isAdminPage ? "container mx-auto px-4 md:px-6" : ""
         } ${isAuthPage ? "flex items-center justify-center min-h-[calc(100vh-120px)]" : ""}`}

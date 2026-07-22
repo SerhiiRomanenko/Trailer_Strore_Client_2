@@ -5,6 +5,7 @@ import { fetchOrderById } from "../redux/ordersSlice";
 import { CheckCircle2, Copy, ArrowRight } from "lucide-react";
 import { useToast } from "../components/Toast";
 import TrailerLoading from "../components/TrailerLoading";
+import { setMeta, SITE_URL } from "../utils/seo";
 
 interface Props {
   orderId: string;
@@ -25,8 +26,11 @@ const OrderConfirmationPage: React.FC<Props> = ({ orderId }) => {
   }, [order, orderId, dispatch, detailStatus]);
 
   useEffect(() => {
-    document.title = "Замовлення підтверджено | ПричепМаркет";
-  }, []);
+    const title = "Замовлення підтверджено | ПричепМаркет";
+    const desc = "Ваше замовлення успішно оформлено. Деталі замовлення та наступні кроки.";
+    const canonical = `${SITE_URL}/order-confirmation/${orderId}`;
+    setMeta({ title, description: desc, canonical, noindex: true });
+  }, [orderId]);
 
   const handleNav = (e: React.MouseEvent, path: string) => {
     e.preventDefault();

@@ -1,4 +1,13 @@
 User-agent: *
 Allow: /
 
+# Block private/admin pages from indexing
+Disallow: /admin
+Disallow: /login
+Disallow: /register
+Disallow: /my-profile
+Disallow: /my-orders
+Disallow: /order-confirmation/
+Disallow: /checkout
+
 Sitemap: https://trailer-strore-client-3.vercel.app/sitemap.xml
