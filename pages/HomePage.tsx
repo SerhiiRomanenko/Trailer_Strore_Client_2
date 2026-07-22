@@ -47,7 +47,7 @@ const HomePage: React.FC = () => {
     minPrice: "",
     maxPrice: "",
     brands: [],
-    inStockOnly: false,
+    inStockOnly: true,
     suspensionTypes: [],
   });
 

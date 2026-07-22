@@ -34,7 +34,7 @@ const ComponentList: React.FC = () => {
     maxPrice: "",
     brands: [],
     componentTypes: [],
-    inStockOnly: false,
+    inStockOnly: true,
   });
 
   const allBrands = useMemo(() => {

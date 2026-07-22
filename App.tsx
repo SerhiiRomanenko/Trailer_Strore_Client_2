@@ -22,11 +22,10 @@ import MyProfilePage from "./pages/MyProfilePage";
 import { AppDispatch } from "./redux/store";
 import { ToastProvider } from "./components/Toast";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import { FilterUIProvider, useFilterUI } from "./contexts/FilterContext";
+import { FilterUIProvider } from "./contexts/FilterContext";
 
 const AppContent: React.FC = () => {
   const { currentUser } = useAuth();
-  const { showFilter, onOpenFilters, activeFilterCount } = useFilterUI();
   const [route, setRoute] = useState(window.location.pathname);
 
   useEffect(() => {
@@ -106,7 +105,7 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-[var(--color-bg)]">
-      {!isAdminPage && <Header route={route} showFilter={showFilter} onOpenFilters={onOpenFilters || undefined} activeFilterCount={activeFilterCount} />}
+      {!isAdminPage && <Header route={route} />}
       <main
         id="main-content"
         className={`flex-grow ${
